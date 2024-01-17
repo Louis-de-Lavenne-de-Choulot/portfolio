@@ -148,10 +148,10 @@ export default async function Game() {
             name: "LIMITLESS jeu PC/VR UNITY",posX: 0,posY: 0,color: "rgba(105, 100, 150, 1)", link: "https://github.com/BrendonDesvaux/Limitless"
         },
         {
-            name: "Article VPN dans Programmez",posX: 0,posY: 0,color: "rgba(225, 150, 80, 1)", link: "/Prog.pdf"
+            name: "Article VPN dans Programmez",posX: 0,posY: 0,color: "rgba(225, 190, 80, 1)", link: "/Prog.pdf"
         },
         {
-            name: "C# Light ORM",posX: 0,posY: 0,color: "rgba(165, 160, 15, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/LORM"
+            name: "C# Light ORM",posX: 0,posY: 0,color: "rgba(165, 240, 15, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/LORM"
         }
     ]
 
