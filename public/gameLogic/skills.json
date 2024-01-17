@@ -1,0 +1,54 @@
+{
+    "Struggle": {
+        "name": "Struggle",
+        "type": "attack",
+        "aoe": false,
+        "power": 8,
+        "recoil": 2,
+        "accuracy": 80,
+        "range": 1,
+        "pp": 10,
+        "maxPP": 10,
+        "effect": "Deals damage to the target. The user also takes 1/4 of the damage it dealt in recoil.",
+        "effects": []
+    },
+    "Tackle": {
+        "name": "Tackle",
+        "type": "normal",
+        "aoe": false,
+        "power": 2,
+        "recoil": 0,
+        "accuracy": 90,
+        "range": 1,
+        "pp": 35,
+        "maxPP": 35,
+        "effect": "Has a high chance of dealing some damages to the target.",
+        "effects": []
+    },
+    "Fireball": {
+        "name": "Fireball",
+        "type": "fire",
+        "aoe": true,
+        "power": 5,
+        "recoil": 0,
+        "accuracy": 90,
+        "range": 3,
+        "pp": 20,
+        "maxPP": 20,
+        "effect": "Burns all enemies around you. it has a small chance of burning the enemy",
+        "effects": [[0, 10]]
+    },
+    "MegaBall": {
+        "name": "MegaBall",
+        "type": "fire",
+        "aoe": true,
+        "power": 8,
+        "recoil": 0,
+        "accuracy": 90,
+        "range": 2,
+        "pp": 8,
+        "maxPP": 8,
+        "effect": "Deals a lot of damage to targets around you.",
+        "effects": [[0, 10]]
+    }
+}

@@ -1,0 +1,151 @@
+{
+    "blade": {
+        "id": 0,
+        "name": "Blade",
+        "damage": 1,
+        "speed": 1,
+        "self": false,
+        "effects": [],
+        "sprite": "blade.png",
+        "rgb": "rgb(255, 0, 0)"
+    },
+    "sword": {
+        "id": 1,
+        "name": "Sword",
+        "damage": 2,
+        "speed": 0.5,
+        "self": false,
+        "effects": [],
+        "sprite": "sword.png",
+        "rgb": "rgb(0, 0, 255)"
+    },
+    "axe": {
+        "id": 2,
+        "name": "Axe",
+        "damage": 3,
+        "speed": 0.75,
+        "self": false,
+        "effects": [],
+        "sprite": "axe.png",
+        "rgb": "rgb(0, 255, 0)"
+    },
+    "dagger": {
+        "id": 3,
+        "name": "Dagger",
+        "damage": 1,
+        "speed": 1.5,
+        "self": false,
+        "effects": [],
+        "sprite": "dagger.png",
+        "rgb": "rgb(255, 255, 0)"
+    },
+    "spear": {
+        "id": 4,
+        "name": "Spear",
+        "damage": 3,
+        "speed": 1.25,
+        "self": false,
+        "effects": [],
+        "sprite": "spear.png",
+        "rgb": "rgb(128, 128, 128)"
+    },
+    "mace": {
+        "id": 5,
+        "name": "Mace",
+        "damage": 4,
+        "speed": 0.75,
+        "self": false,
+        "effects": [],
+        "sprite": "mace.png",
+        "rgb": "rgb(255, 165, 0)"
+    },
+    "hammer": {
+        "id": 6,
+        "name": "Hammer",
+        "damage": 5,
+        "speed": 0.5,
+        "self": false,
+        "effects": [],
+        "sprite": "hammer.png",
+        "rgb": "rgb(128, 0, 128)"
+    },
+    "club": {
+        "id": 7,
+        "name": "Club",
+        "damage": 6,
+        "speed": 0.25,
+        "self": false,
+        "effects": [],
+        "sprite": "club.png",
+        "rgb": "rgb(0, 128, 128)"
+    },
+    "bow": {
+        "id": 8,
+        "name": "Bow",
+        "damage": 2,
+        "speed": 1,
+        "self": false,
+        "effects": [],
+        "sprite": "bow.png",
+        "rgb": "rgb(255, 192, 203)"
+    },
+    "crossbow": {
+        "id": 9,
+        "name": "Crossbow",
+        "damage": 3,
+        "speed": 0.75,
+        "self": false,
+        "effects": [],
+        "sprite": "crossbow.png",
+        "rgb": "rgb(0, 255, 255)"
+    },
+    "slingshot": {
+        "id": 10,
+        "name": "Slingshot",
+        "damage": 1,
+        "speed": 1.5,
+        "self": false,
+        "effects": [],
+        "sprite": "slingshot.png",
+        "rgb": "rgb(255, 255, 255)"
+    },
+    "wand": {
+        "id": 11,
+        "name": "Wand",
+        "damage": 1,
+        "speed": 1,
+        "self": false,
+        "effects": [],
+        "sprite": "wand.png",
+        "rgb": "rgb(128, 0, 0)"
+    },
+    "staff": {
+        "id": 12,
+        "name": "Staff",
+        "damage": 2,
+        "speed": 0.5,
+        "self": false,
+        "effects": [],
+        "sprite": "staff.png",
+        "rgb": "rgb(0, 128, 0)"
+    },
+    "orb": {
+        "id": 13,
+        "name": "Orb",
+        "damage": 3,
+        "speed": 0.75,
+        "self": false,
+        "effects": [],
+        "sprite": "orb.png",
+        "rgb": "rgb(128, 128, 0)"
+    },
+    "health_candy": {
+        "id": 14,
+        "name": "Health Candy",
+        "damage": -20,
+        "speed": 0,
+        "self": true,
+        "effects": [],
+        "sprite": "health_candy.png"
+    }
+}

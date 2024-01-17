@@ -1,0 +1,162 @@
+{
+    "goblin": {
+        "id": 1,
+        "name": "Goblin",
+        "hp": 10,
+        "attack": 2,
+        "range": 1,
+        "defense": 0,
+        "level" : 1,
+        "xpMultiplier": 1.6,
+        "gold": 1,
+        "hold": [],
+        "sprite": "goblin.png"
+    },
+    "goblin_warrior": {
+        "id": 2,
+        "name": "Goblin Warrior",
+        "hp": 20,
+        "attack": 4,
+        "range": 1,
+        "defense": 1,
+        "level" : 2,
+        "xpMultiplier": 1.6,
+        "gold": 2,
+        "hold": [],
+        "sprite": "goblin_warrior.png"
+    },
+    "goblin_mage": {
+        "id": 3,
+        "name": "Goblin Mage",
+        "hp": 15,
+        "attack": 3,
+        "range": 5,
+        "defense": 0,
+        "level" : 2,
+        "xpMultiplier": 1.6,
+        "gold": 2,
+        "hold": [],
+        "sprite": "goblin_mage.png"
+    },
+    "goblin_king": {
+        "id": 4,
+        "name": "Goblin King",
+        "hp": 30,
+        "attack": 5,
+        "range": 1,
+        "defense": 2,
+        "level" : 3,
+        "xpMultiplier": 1.6,
+        "gold": 3,
+        "hold": [],
+        "sprite": "goblin_king.png"
+    },
+    "goblin_queen": {
+        "id": 5,
+        "name": "Goblin Queen",
+        "hp": 25,
+        "attack": 3,
+        "range": 5,
+        "defense": 1,
+        "level" : 4,
+        "xpMultiplier": 1.6,
+        "gold": 3,
+        "hold": [],
+        "sprite": "goblin_queen.png"
+    },
+    "goblin_champion": {
+        "id": 6,
+        "name": "Goblin Champion",
+        "hp": 70,
+        "attack": 8,
+        "range": 1,
+        "defense": 3,
+        "level" : 5,
+        "xpMultiplier": 1.6,
+        "gold": 4,
+        "hold": [
+            [5, 1]
+        ],
+        "sprite": "goblin_champion.png"
+    },
+    "fantom": {
+        "id": 7,
+        "name": "fantom",
+        "hp": 25,
+        "attack": 6,
+        "range": 1,
+        "defense": 1,
+        "level" : 6,
+        "xpMultiplier": 1.6,
+        "gold": 4,
+        "hold": [],
+        "sprite": "fantom.png"
+    },
+    "fantom_warrior": {
+        "id": 8,
+        "name": "fantom Warrior",
+        "hp": 35,
+        "attack": 8,
+        "range": 1,
+        "defense": 2,
+        "level" : 8,
+        "xpMultiplier": 1.6,
+        "gold": 5,
+        "hold": [],
+        "sprite": "fantom_warrior.png"
+    },
+    "fantom_mage": {
+        "id": 9,
+        "name": "fantom Mage",
+        "hp": 30,
+        "attack": 7,
+        "range": 5,
+        "defense": 1,
+        "level" : 8,
+        "xpMultiplier": 1.6,
+        "gold": 5,
+        "hold": [],
+        "sprite": "fantom_mage.png"
+    },
+    "fantom_king": {
+        "id": 10,
+        "name": "fantom King",
+        "hp": 50,
+        "attack": 10,
+        "range": 1,
+        "defense": 3,
+        "level" : 12,
+        "xpMultiplier": 1.6,
+        "gold": 6,
+        "hold": [],
+        "sprite": "fantom_king.png"
+    },
+    "fantom_queen": {
+        "id": 11,
+        "name": "fantom Queen",
+        "hp": 45,
+        "attack": 9,
+        "range": 5,
+        "defense": 2,
+        "level" : 12,
+        "xpMultiplier": 1.6,
+        "gold": 6,
+        "hold": [],
+        "sprite": "fantom_queen.png"
+    },
+    "fantom_champion": {
+        "id": 12,
+        "name": "fantom Champion",
+        "hp": 120,
+        "attack": 16,
+        "range": 1,
+        "defense": 4,
+        "level" : 18,
+        "xpMultiplier": 1.6,
+        "gold": 7,
+        "hold": [
+            [11, 1]
+        ],
+        "sprite": "fantom_champion.png"
+    }
+}

@@ -1,0 +1,66 @@
+{
+    "burn": {
+        "id": 0,
+        "damage": 1,
+        "duration": 5,
+        "self": false,
+        "stackable": false,
+        "sprite": "burn.png"
+    },
+    "poison": {
+        "id": 1,
+        "damage": 1,
+        "duration": 1,
+        "self": false,
+        "stackable": true,
+        "sprite": "poison.png"
+    },
+    "bleeding": {
+        "id": 2,
+        "damage": 1.25,
+        "duration": 0.5,
+        "self": false,
+        "stackable": true,
+        "sprite": "bleeding.png"
+    },
+    "stun": {
+        "id": 3,
+        "damage": 0,
+        "duration": 1,
+        "self": false,
+        "stackable": false,
+        "sprite": "stun.png"
+    },
+    "slow": {
+        "id": 4,
+        "damage": 0,
+        "duration": 2,
+        "self": false,
+        "stackable": false,
+        "sprite": "slow.png"
+    },
+    "freeze": {
+        "id": 5,
+        "damage": 1,
+        "duration": 3,
+        "self": false,
+        "stackable": false,
+        "sprite": "freeze.png"
+    },
+    "knockback": {
+        "id": 6,
+        "damage": 3,
+        "duration": 0,
+        "self": false,
+        "stackable": false,
+        "sprite": "knockback.png"
+    }, 
+    "heal": {
+        "id": 7,
+        "damage": -20,
+        "duration": 0,
+        "self": true,
+        "stackable": false,
+        "sprite": "heal.png"
+    }
+}

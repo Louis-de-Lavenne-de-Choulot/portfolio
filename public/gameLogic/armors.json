@@ -1,0 +1,52 @@
+{
+    "clothes": {
+        "name": "clothes",
+        "armor": 0,
+        "texture": "clothes.png"
+    },
+    "leather": {
+        "name": "leather",
+        "armor": 10,
+        "texture": "leather.png"
+    },
+    "chainmail": {
+        "name": "chainmail",
+        "armor": 20,
+        "texture": "chainmail.png"
+    },
+    "iron_plate": {
+        "name": "iron_plate",
+        "armor": 30,
+        "texture": "iron_plate.png"
+    },
+    "steel_plate": {
+        "name": "steel_plate",
+        "armor": 40,
+        "texture": "steel_plate.png"
+    },
+    "mithril_plate": {
+        "name": "mithril_plate",
+        "armor": 50,
+        "texture": "mithril_plate.png"
+    },
+    "adamantite_plate": {
+        "name": "adamantite_plate",
+        "armor": 60,
+        "texture": "adamantite_plate.png"
+    },
+    "rune_plate": {
+        "name": "rune_plate",
+        "armor": 70,
+        "texture": "rune_plate.png"
+    },
+    "dragon_plate": {
+        "name": "dragon_plate",
+        "armor": 80,
+        "texture": "dragon_plate.png"
+    },
+    "god_plate": {
+        "name": "god_plate",
+        "armor": 90,
+        "texture": "god_plate.png"
+    }
+}
