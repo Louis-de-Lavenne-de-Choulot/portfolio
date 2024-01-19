@@ -176,6 +176,9 @@ h4 {
 #image_map {
     display: flex;
     justify-content: center;
+    height: 700px;
+    width: 700px;
+    position: relative;
 }
 
 #image_map canvas{

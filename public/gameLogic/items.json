@@ -6,8 +6,7 @@
         "speed": 1,
         "self": false,
         "effects": [],
-        "sprite": "blade.png",
-        "rgb": "rgb(255, 0, 0)"
+        "sprite": ["image/maps/Items/icons/16x16/blade.png", 0, 0, 16]
     },
     "sword": {
         "id": 1,
@@ -16,8 +15,7 @@
         "speed": 0.5,
         "self": false,
         "effects": [],
-        "sprite": "sword.png",
-        "rgb": "rgb(0, 0, 255)"
+        "sprite": ["image/maps/Items/icons/16x16/sword.png", 0, 0, 16]
     },
     "axe": {
         "id": 2,
@@ -26,8 +24,7 @@
         "speed": 0.75,
         "self": false,
         "effects": [],
-        "sprite": "axe.png",
-        "rgb": "rgb(0, 255, 0)"
+        "sprite": ["image/maps/Items/icons/16x16/axe.png", 0, 0, 16]
     },
     "dagger": {
         "id": 3,
@@ -36,8 +33,7 @@
         "speed": 1.5,
         "self": false,
         "effects": [],
-        "sprite": "dagger.png",
-        "rgb": "rgb(255, 255, 0)"
+        "sprite": ["image/maps/Items/icons/16x16/dagger.png", 0, 0, 16]
     },
     "spear": {
         "id": 4,
@@ -46,8 +42,7 @@
         "speed": 1.25,
         "self": false,
         "effects": [],
-        "sprite": "spear.png",
-        "rgb": "rgb(128, 128, 128)"
+        "sprite": ["image/maps/Items/icons/16x16/spear.png", 0, 0, 16]
     },
     "mace": {
         "id": 5,
@@ -56,8 +51,7 @@
         "speed": 0.75,
         "self": false,
         "effects": [],
-        "sprite": "mace.png",
-        "rgb": "rgb(255, 165, 0)"
+        "sprite": ["image/maps/Items/icons/16x16/mace.png", 0, 0, 16]
     },
     "hammer": {
         "id": 6,
@@ -66,8 +60,7 @@
         "speed": 0.5,
         "self": false,
         "effects": [],
-        "sprite": "hammer.png",
-        "rgb": "rgb(128, 0, 128)"
+        "sprite": ["image/maps/Items/icons/16x16/hammer.png", 0, 0, 16]
     },
     "club": {
         "id": 7,
@@ -76,8 +69,7 @@
         "speed": 0.25,
         "self": false,
         "effects": [],
-        "sprite": "club.png",
-        "rgb": "rgb(0, 128, 128)"
+        "sprite": ["image/maps/Items/icons/16x16/club.png", 0, 0, 16]
     },
     "bow": {
         "id": 8,
@@ -86,8 +78,7 @@
         "speed": 1,
         "self": false,
         "effects": [],
-        "sprite": "bow.png",
-        "rgb": "rgb(255, 192, 203)"
+        "sprite": ["image/maps/Items/icons/16x16/bow.png", 0, 0, 16]
     },
     "crossbow": {
         "id": 9,
@@ -96,8 +87,7 @@
         "speed": 0.75,
         "self": false,
         "effects": [],
-        "sprite": "crossbow.png",
-        "rgb": "rgb(0, 255, 255)"
+        "sprite": ["image/maps/Items/icons/16x16/crossbow.png", 0, 0, 16]
     },
     "slingshot": {
         "id": 10,
@@ -106,8 +96,7 @@
         "speed": 1.5,
         "self": false,
         "effects": [],
-        "sprite": "slingshot.png",
-        "rgb": "rgb(255, 255, 255)"
+        "sprite": ["image/maps/Items/icons/16x16/slingshot.png", 0, 0, 16]
     },
     "wand": {
         "id": 11,
@@ -116,8 +105,7 @@
         "speed": 1,
         "self": false,
         "effects": [],
-        "sprite": "wand.png",
-        "rgb": "rgb(128, 0, 0)"
+        "sprite": ["image/maps/Items/icons/16x16/wand.png", 0, 0, 16]
     },
     "staff": {
         "id": 12,
@@ -126,8 +114,7 @@
         "speed": 0.5,
         "self": false,
         "effects": [],
-        "sprite": "staff.png",
-        "rgb": "rgb(0, 128, 0)"
+        "sprite": ["image/maps/Items/icons/16x16/staff.png", 0, 0, 16]
     },
     "orb": {
         "id": 13,
@@ -136,8 +123,7 @@
         "speed": 0.75,
         "self": false,
         "effects": [],
-        "sprite": "orb.png",
-        "rgb": "rgb(128, 128, 0)"
+        "sprite": ["image/maps/Items/icons/16x16/orb.png", 0, 0, 16]
     },
     "health_candy": {
         "id": 14,
@@ -146,6 +132,42 @@
         "speed": 0,
         "self": true,
         "effects": [],
-        "sprite": "health_candy.png"
+        "sprite": ["image/maps/Items/icons/16x16/health_candy.png", 0, 0, 16]
+    },
+    "upArrow": {
+        "id": 15,
+        "name": "Up Arrow",
+        "damage": 0,
+        "speed": 0,
+        "self": false,
+        "effects": [],
+         "sprite": ["image/maps/Items/icons/32x32/arrows.png", 0, 32, 32]
+    },
+    "downArrow": {
+        "id": 16,
+        "name": "Down Arrow",
+        "damage": 0,
+        "speed": 0,
+        "self": false,
+        "effects": [],
+        "sprite": ["image/maps/Items/icons/32x32/arrows.png", 32, 0, 32]
+    },
+    "leftArrow": {
+        "id": 17,
+        "name": "Left Arrow",
+        "damage": 0,
+        "speed": 0,
+        "self": false,
+        "effects": [],
+         "sprite": ["image/maps/Items/icons/32x32/arrows.png", 32, 32, 32]
+    },
+    "rightArrow": {
+        "id": 18,
+        "name": "Right Arrow",
+        "damage": 0,
+        "speed": 0,
+        "self": false,
+        "effects": [],
+         "sprite": ["image/maps/Items/icons/32x32/arrows.png", 0, 0, 32]
     }
 }

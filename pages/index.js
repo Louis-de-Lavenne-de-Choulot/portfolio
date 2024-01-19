@@ -12,7 +12,7 @@ function HomePage() {
       <h1 id="title">Welcome on my CV</h1>
       <h3 id="subtitle">by: <a href="https://github.com/Polonit" target="_blank">Louis de Lavenne de Choulot de Chabaud-la-Tour</a></h3>
       </div>
-      <span style={{marginTop: "4vw", display: "flex", justifyContent: "space-evenly", fontSize: "20px"}}>
+      <span style={{marginTop: "4vw", display: "flex", flexDirection: "column", alignItems: "center"}}>
       <div>
       <p>Use [z]/[w], [q]/[a], [s], [d] to move (ZQSD or WASD or Arrows)</p>
       <p>[enter] key to open the UI :<br/>[z]/[w] to move up<br/> [s] to move down<br/> [d] or [enter] to select</p>
@@ -29,19 +29,19 @@ function HomePage() {
       </span>
       </div>
       <div id="image_map">
-        <canvas id="canvass" style={{ height: '564px', width: '564px', imageRendering: 'pixelated' }}></canvas>
+        <canvas id="canvass" style={{ height: '700px', width: '700px', imageRendering: 'pixelated' }}></canvas>
         {/* create overlapping canvas with id "Characters" to display the UI */}
-        <canvas id="characters" style={{ height: '564px', width: '564px', imageRendering: 'pixelated' }}></canvas>
+        <canvas id="characters" style={{ height: '700px', width: '700px', imageRendering: 'pixelated' }}></canvas>
         {/* create overlapping canvas with id "UI" to display the UI */}
-        <canvas id="ui" style={{ height: '564px', width: '564px', imageRendering: 'pixelated' }}></canvas>
+        <canvas id="ui" style={{ height: '700px', width: '700px', imageRendering: 'pixelated' }}></canvas>
       </div>
       </span>
       {/* affichage du cv traditionnnel en format public\Louis de Lavenne de Choulot.pdf*/}
       <div style={{display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center", marginTop: "20vw", backgroundColor: "black"}}>
       <h3 id="subtitle">Download my CV</h3>
-      <a href="\cv.pdf" download="Louis de Lavenne de Choulot.pdf">Download</a>
+      <a href="/pdf/cv.pdf" download="Louis de Lavenne de Choulot.pdf">Download</a>
       {/* previex */}
-      <iframe src="\cv.pdf" width="900px" height="1200px">
+      <iframe src="/pdf/cv.pdf" width="900px" height="1200px">
       </iframe>
     </div>
     </div>

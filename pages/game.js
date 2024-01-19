@@ -14,7 +14,7 @@ export default async function Game() {
     let normMapSize = 3000;
     let size = 54;
     let mPos = Math.floor(normMapSize / size);
-    let canvasSIZE = 564;
+    let canvasSIZE = 700;
     let viewZoom = 10;
 
 
@@ -106,13 +106,16 @@ export default async function Game() {
     }
 
     class Item {
-        constructor(name, damage, speed, self, effects, sprite) {
+        constructor(name, damage, speed, self, effects, sprite, SSposX, SSposY, SSsize) {
             this.name = name;
             this.damage = damage;
             this.speed = speed;
             this.self = self;
             this.effects = effects;
             this.spriteSheet = sprite;
+            this.SSposX = SSposX;
+            this.SSposY = SSposY;
+            this.SSsize = SSsize;
         }
     }
 
@@ -121,37 +124,37 @@ export default async function Game() {
         posY: 0,
         color: "rgb(255, 0, 255)",
     }
-    
+
     let projects = [
         {
-            name: "Simu Multiplayer VR UNITY",posX: 0,posY: 0,color: "rgba(255, 255, 0, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/ALGOSUP_2022_Project_4_F"
+            name: "Simu Multiplayer VR UNITY", posX: 0, posY: 0, color: "rgba(255, 255, 0, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/ALGOSUP_2022_Project_4_F"
         },
         {
-            name: "Application de Management",posX: 0,posY: 0,color: "rgba(255, 0, 100, 1)", link: ""
+            name: "Application de Management", posX: 0, posY: 0, color: "rgba(255, 0, 100, 1)", link: ""
         },
         {
-            name: "Synthetiseur musique - F#",posX: 0,posY: 0,color: "rgba(25, 205, 100, 1)", link: "https://github.com/ClementCaton/ALGOSUP_2022_Project_3_A"
+            name: "Synthetiseur musique - F#", posX: 0, posY: 0, color: "rgba(25, 205, 100, 1)", link: "https://github.com/ClementCaton/ALGOSUP_2022_Project_3_A"
         },
         {
-            name: "Sites web clients Wordpress",posX: 0,posY: 0,color: "rgba(255, 100, 150, 1)", link: "https://annepouraud.fr/"
+            name: "Sites web clients Wordpress", posX: 0, posY: 0, color: "rgba(255, 100, 150, 1)", link: "https://annepouraud.fr/"
         },
         {
-            name: "Site web de EURO WEB PARTNERS",posX: 0,posY: 0,color: "rgba(0, 100, 255, 1)", link: "https://ewp.fr/"
+            name: "Site web de EURO WEB PARTNERS", posX: 0, posY: 0, color: "rgba(0, 100, 255, 1)", link: "https://ewp.fr/"
         },
         {
-            name: "Serveur ultra sécurisé - Go compilé",posX: 0,posY: 0,color: "rgba(255, 102, 255, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/Go-server"
+            name: "Serveur ultra sécurisé - Go compilé", posX: 0, posY: 0, color: "rgba(255, 102, 255, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/Go-server"
         },
         {
-            name: "Personal AI (reproduction d'Alexa++) - Go",posX: 0,posY: 0,color: "rgba(205, 100, 100, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/Personal-AI"
+            name: "Personal AI (reproduction d'Alexa++) - Go", posX: 0, posY: 0, color: "rgba(205, 100, 100, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/Personal-AI"
         },
         {
-            name: "LIMITLESS jeu PC/VR UNITY",posX: 0,posY: 0,color: "rgba(105, 100, 150, 1)", link: "https://github.com/BrendonDesvaux/Limitless"
+            name: "LIMITLESS jeu PC/VR UNITY", posX: 0, posY: 0, color: "rgba(105, 100, 150, 1)", link: "https://github.com/BrendonDesvaux/Limitless"
         },
         {
-            name: "Article VPN dans Programmez",posX: 0,posY: 0,color: "rgba(225, 190, 80, 1)", link: "/Prog.pdf"
+            name: "Article VPN dans Programmez", posX: 0, posY: 0, color: "rgba(225, 190, 80, 1)", link: "/pdf/Prog.pdf"
         },
         {
-            name: "C# Light ORM",posX: 0,posY: 0,color: "rgba(165, 240, 15, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/LORM"
+            name: "C# Light ORM", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/LORM"
         }
     ]
 
@@ -283,10 +286,10 @@ export default async function Game() {
     await fetch('/gameLogic/characters.json')
         .then(response => response.json())
         .then(data => {
-            characters = data;
+            characters = dacanvasSIZEta;
         });
-    
-    
+
+
     ctx = canvasGame.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     ctx.canvas.width = canvasSIZE;
@@ -327,6 +330,11 @@ export default async function Game() {
         player.spriteSheet.src = chara.spriteSheet;
         player.gotHit = false;
     }
+
+    // tutorial text into tiles
+    // emulator like on phone
+    // treasure chest download cv
+    // add a menu to select the character
 
     function generateRooms() {
         let roomNumber = Math.floor(Math.random() * 20) + 10;
@@ -764,7 +772,7 @@ export default async function Game() {
                     ctx.drawImage(tileAtlas, sourceX, sourceY, tileSizeMap, tileSizeMap, (animoccur[0] + occurencecounter[0]) * canvaswidth, (animoccur[1] + occurencecounter[1]) * canvasheight, canvaswidth, canvasheight);
                     if (layerItems[i][j] !== undefined) {
                         let item = layerItems[i][j];
-                        ctxchar.drawImage(item.spriteSheet, 0, 0, 16, 16, (animoccur[0] + occurencecounter[0] + 0.20) * canvaswidth, (animoccur[1] + occurencecounter[1] + 0.30) * canvasheight, 32, 32);
+                        ctxchar.drawImage(item.spriteSheet, item.SSposX, item.SSposY, item.SSsize, item.SSsize, (animoccur[0] + occurencecounter[0] + 0.04*i/posXmax) * canvaswidth, (animoccur[1] + occurencecounter[1] + 0.04*j/posYmax) * canvasheight, canvaswidth, canvasheight);
                     }
                     if (layerCharacters[i][j] !== undefined) {
                         if (layerCharacters[i][j] === 1) {
@@ -871,10 +879,9 @@ export default async function Game() {
             drawUI();
             await new Promise(r => setTimeout(r, 25));
         }
-
         player.spriteDirection = [0, 0];
-
-
+        
+        action_in_progress = false;
     }
 
     async function drawMap() {
@@ -966,7 +973,7 @@ export default async function Game() {
                 ctx.drawImage(tileAtlas, sourceX, sourceY, tileSizeMap, tileSizeMap, occurencecounter[0] * canvaswidth, occurencecounter[1] * canvasheight, canvaswidth, canvasheight);
                 if (layerItems[i][j] !== undefined) {
                     let item = layerItems[i][j];
-                    ctxchar.drawImage(item.spriteSheet, 0, 0, 16, 16, (occurencecounter[0] + 0.20) * canvaswidth, (occurencecounter[1] + 0.30) * canvasheight, 32, 32);
+                    ctxchar.drawImage(item.spriteSheet, item.SSposX, item.SSposY, item.SSsize, item.SSsize, (occurencecounter[0] + 0.04) * canvaswidth, (occurencecounter[1] + 0.04) * canvasheight, canvaswidth, canvasheight);
                 }
                 if (layerCharacters[i][j] !== undefined) {
                     if (layerCharacters[i][j] === 1) {
@@ -1032,7 +1039,7 @@ export default async function Game() {
 
     }
 
-    function spawn(avoid) {
+    function spawn(avoid, player) {
         //get the number of rooms
         let roomNumber = usedPosBounds.length;
         //get a random room
@@ -1043,12 +1050,12 @@ export default async function Game() {
             } else {
                 room--;
             }
-        }
-        //get a point in the room
+        };
         let pos = getPointInRoom(room);
         return [pos[0], pos[1], room];
     }
 
+    //TODO: getPoinInRoom is called by spawn() and an edge case exist where the point is moved to avoid actual existing sprite but then brought back to this point by this function
     function getPointInRoom(room) {
         //get a point in the room
         let posX = Math.floor(Math.random() * usedPosBounds[room][2]) + usedPosBounds[room][0];
@@ -1094,8 +1101,7 @@ export default async function Game() {
                     itemT -= InFloor.items[j][1] * 10;
                 }
             }
-            let itm = new Item(iteminst.name, iteminst.damage, iteminst.speed, iteminst.self, iteminst.effects, floorItems[remember]);
-            items.push(itm);
+            items.push(floorItems[remember])
         }
 
         // random point in random room
@@ -1172,13 +1178,33 @@ export default async function Game() {
             floorEnemies.push(en);
         }
 
+        let arrowup;
+        let arrowdown;
+        let arrowleft;
+        let arrowright;
         //load images items
         InFloor = Object.values(floors).find(obj => obj.id === floornumber);
         for (let i = 0; i < InFloor.items.length; i++) {
             let item = Object.values(allItems).find(obj => obj.id === InFloor.items[i][0]);
             let it = new Image();
-            it.src = "image/maps/Items/icons/16x16/" + item.sprite;
-            floorItems.push(it);
+            it.src = item.sprite[0];
+            switch (item.name) {
+                case "Up Arrow":
+                    arrowup = new Item(item.name, item.damage, item.speed, item.self, item.effects, it, item.sprite[1], item.sprite[2], item.sprite[3]);
+                    break;
+                case "Down Arrow":
+                    arrowdown = new Item(item.name, item.damage, item.speed, item.self, item.effects, it, item.sprite[1], item.sprite[2], item.sprite[3]);
+                    break;
+                case "Left Arrow":
+                    arrowleft = new Item(item.name, item.damage, item.speed, item.self, item.effects, it, item.sprite[1], item.sprite[2], item.sprite[3]);
+                    break;
+                case "Right Arrow":
+                    arrowright = new Item(item.name, item.damage, item.speed, item.self, item.effects, it, item.sprite[1], item.sprite[2], item.sprite[3]);
+                    break;
+                default:
+                    floorItems.push(new Item(item.name, item.damage, item.speed, item.self, item.effects, it, item.sprite[1], item.sprite[2], item.sprite[3]));
+                    break;
+            }
         }
 
         drawRooms();
@@ -1189,12 +1215,17 @@ export default async function Game() {
             layerCharacters[i] = []; //new Uint8Array(mPos); // layerBG[i].length
             layerItems[i] = []; //new Uint8Array(mPos); //layerBG[i].length
         }
-
+        // let toavoid = [];
         //spawn player
-        let pS = spawn();
+        let pS = spawn([]); //spawn player
         player.posX = pS[0];
         player.posY = pS[1];
         layerCharacters[player.posX][player.posY] = 1;
+        //set the 4 directions of the player as tiles 6 7 8 9
+        layerItems[player.posX][player.posY - 1] = arrowup
+        layerItems[player.posX][player.posY + 1] = arrowdown
+        layerItems[player.posX - 1][player.posY] = arrowleft
+        layerItems[player.posX + 1][player.posY] = arrowright
 
         //spawn exit
         for (let i = 0; i < projects.length; i++) {
@@ -1202,8 +1233,9 @@ export default async function Game() {
             projects[i].posX = exS[0];
             projects[i].posY = exS[1];
             layerBG[projects[i].posX][projects[i].posY] = 4;
+            // toavoid.push(exS[2]);
         }
-        
+
         // initEnemies(pS[2], exS[0], exS[1]);
         // initItems(pS[2], exS[0], exS[1]);
         drawMap();
@@ -1219,13 +1251,8 @@ export default async function Game() {
         updatePlayer();
         // updateProjectiles();
         updateCollision();
-        if (moved) {
-            // because it's stylish
-            if (document.getElementById("animated").checked) {
+        if (moved&&!fastInput) {
                 animatedDrawMap();
-            } else {
-                drawMap();
-            }
         } else {
             drawMap();
         }
@@ -1579,6 +1606,9 @@ export default async function Game() {
     }
 
     function movePlayer(x, y) {
+        if (!fastInput) {
+            action_in_progress = true;
+        }
         let p = player;
         if (layerBG[p.posX + x][p.posY + y] < 10 && layerCharacters[p.posX + x][p.posY + y] === undefined) {
             layerCharacters[p.posX][p.posY] = undefined;
@@ -1594,6 +1624,7 @@ export default async function Game() {
             setTimeout(function () {
                 //stop the animation
                 document.getElementById("image_map").style.animation = "";
+                action_in_progress = false;
             }, 500);
         }
     }
@@ -1698,105 +1729,117 @@ export default async function Game() {
                 break;
         }
     }
+
+
+    let fastInput = false;
+    let pressedkeys = [];
     // event listener for key presses and while not key up move the player
     document.addEventListener('keydown', function (event) {
+        if (!pressedkeys.includes(event.key))
+            pressedkeys.push(event.key);
+
         //remove all other events of arrow keys
         event.preventDefault();
         event.stopPropagation();
         
-        if (action_in_progress && document.getElementById("animated").checked) {
+        if (action_in_progress) {
             return;
         }
-        action_in_progress = true;
-        setTimeout(() => {
-            action_in_progress = false;
-        }, 400);
-
-        var name = (event.key).toLowerCase();
-        if (name.includes("arrow")) {
-            event.preventDefault();
-        }
-        if (player.hp <= 0 || stopInputs) {
-            if (name === "k") {
-                restart();
+        
+        pressedkeys.forEach(element => {
+            var name = element.toLowerCase();
+            if (player.hp <= 0 || stopInputs) {
+                if (name === "k") {
+                    restart();
+                }
+                return;
             }
-            return;
-        }
 
-        switch (name) {
-            case "z":
-            case "w":
-            case "arrowup":
-                if (UIMODE === 0) {
-                    player.spriteDirection[0] = -1;
-                    movePlayer(0, -1);
-                } else {
-                    interfaceUI((cursorOptions - 1 >= 0 ? cursorOptions - 1 : currentOptions.length));
-                }
-                break;
-            case "q":
-            case "a":
-            case "arrowleft":
-                if (UIMODE === 0) {
-                    player.spriteDirection[1] = -1;
-                    movePlayer(-1, 0);
-                }
-                break;
-            case "s":
-            case "arrowdown":
-                if (UIMODE === 0) {
-                    player.spriteDirection[0] = 1;
-                    movePlayer(0, 1);
-                } else {
-                    interfaceUI((cursorOptions + 1 <= currentOptions.length ? cursorOptions + 1 : 0));
-                }
-                break;
-            case "d":
-            case "arrowright":
-                if (UIMODE === 0) {
-                    player.spriteDirection[1] = 1;
-                    movePlayer(1, 0);
-                } else {
-                    interfaceUI(true);
-                }
-                break;
-            case "k":
-                restart();
-                break;
-            case "enter":
-                if (UIMODE === 0) {
-                    UIMODE = 1;
-                    interfaceUI(0);
-                } else {
-                    interfaceUI(true);
-                }
-                break;
-            case "e":
-                if (nFloor) {
-                    nextFloor();
-                } else {
-                    pickUp();
-                }
-                break;
-        }
+            switch (name) {
+                case "shift":
+                    fastInput = true;
+                    break;
+                case "z":
+                case "w":
+                case "arrowup":
+                    if (UIMODE === 0) {
+                        player.spriteDirection[0] = -1;
+                        movePlayer(0, -1);
+                    } else {
+                        interfaceUI((cursorOptions - 1 >= 0 ? cursorOptions - 1 : currentOptions.length));
+                    }
+                    break;
+                case "q":
+                case "a":
+                case "arrowleft":
+                    if (UIMODE === 0) {
+                        player.spriteDirection[1] = -1;
+                        movePlayer(-1, 0);
+                    }
+                    break;
+                case "s":
+                case "arrowdown":
+                    if (UIMODE === 0) {
+                        player.spriteDirection[0] = 1;
+                        movePlayer(0, 1);
+                    } else {
+                        interfaceUI((cursorOptions + 1 <= currentOptions.length ? cursorOptions + 1 : 0));
+                    }
+                    break;
+                case "d":
+                case "arrowright":
+                    if (UIMODE === 0) {
+                        player.spriteDirection[1] = 1;
+                        movePlayer(1, 0);
+                    } else {
+                        interfaceUI(true);
+                    }
+                    break;
+                case "k":
+                    restart();
+                    break;
+                case "enter":
+                    if (UIMODE === 0) {
+                        UIMODE = 1;
+                        interfaceUI(0);
+                    } else {
+                        interfaceUI(true);
+                    }
+                    break;
+                case "e":
+                    if (nFloor) {
+                        nextFloor();
+                    } else {
+                        pickUp();
+                    }
+                    break;
+            }
+        });
     });
 
     function twoAfterComma(int) {
         return Math.round(int * 100) / 100;
     }
-    
+
     //onload
     characterLoader("Kraig");
     generateRooms();
     //show image image/maps/line.png in the canvas
     let loading_img = new Image();
-    loading_img.src = "image/maps/line.png";
+    loading_img.src = "image/logo.png";
     loading_img.onload = function () {
-        ctx.drawImage(loading_img, 0, 0);
+        ctx.drawImage(loading_img, 0, 0, canvasGame.width, canvasGame.height);
     };
-    
+
+    document.addEventListener('keyup', function (event) {
+        pressedkeys.splice(pressedkeys.indexOf(event.key), 1);
+        if (event.key === "Shift") {
+            fastInput = false;
+        }
+    });
+
     //wait 1s
     setTimeout(function () {
         initGame();
-    }, 500);
+    }, 1000);
 }
