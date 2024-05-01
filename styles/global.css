@@ -174,16 +174,14 @@ h4 {
 }
 
 #image_map {
-    display: flex;
-    justify-content: center;
-    height: 700px;
-    width: 700px;
+    display: grid;
     position: relative;
-}
-
-#image_map canvas{
-    position: absolute;
-}
+  }
+  
+  #image_map canvas {
+    grid-column: 1;
+    grid-row: 1;
+  }
 
 .gameimg {
     width: 70vw;

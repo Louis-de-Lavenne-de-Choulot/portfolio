@@ -14,7 +14,7 @@ export default async function Game() {
     let normMapSize = 3000;
     let size = 54;
     let mPos = Math.floor(normMapSize / size);
-    let canvasSIZE = 700;
+    let canvasSIZE = 1000;
     let viewZoom = 10;
 
 
@@ -286,7 +286,7 @@ export default async function Game() {
     await fetch('/gameLogic/characters.json')
         .then(response => response.json())
         .then(data => {
-            characters = dacanvasSIZEta;
+            characters = data;
         });
 
 
@@ -584,13 +584,13 @@ export default async function Game() {
         let inc = 150 / (texts.length + 2);
         texts.forEach(txt => {
             maxH += inc;
-            ctxui.fillText(txt, canvasGame.width / 10 + 20, maxH);
-            ctxui.strokeText(txt, canvasGame.width / 10 + 20, maxH);
+            ctxui.fillText(txt, canvasGame.width / 8 + 20, maxH);
+            ctxui.strokeText(txt, canvasGame.width / 8 + 20, maxH);
         })
         maxH += inc;
-        //gold
-        ctxui.fillText(`money: ${player.gold}`, canvasGame.width / 10 + 20, maxH);
-        ctxui.strokeText(`money: ${player.gold}`, canvasGame.width / 10 + 20, maxH);
+        //gold also in bottom part
+        ctxui.fillText(`money: ${player.gold}`, canvasGame.width / 8 + 20, maxH);
+        ctxui.strokeText(`money: ${player.gold}`, canvasGame.width / 8 + 20, maxH);
 
         //left part
         maxH = 60;
@@ -655,72 +655,97 @@ export default async function Game() {
 
     async function drawUI() {
         let lifeBar = 150;
-        ctx.fillStyle = "rgba(230, 80, 0, 1)";
-        ctx.fillRect((canvasGame.width / 2 * 1.3), 5, lifeBar, 15);
+        ctxui.fillStyle = "rgba(230, 80, 0, 1)";
+        ctxui.fillRect((canvasGame.width / 2 * 1.3), 5, lifeBar, 15);
         let healthBar = (lifeBar * player.hp) / player.maxHp;
-        ctx.fillStyle = "rgba(40, 200, 0, 1)";
-        ctx.fillRect((canvasGame.width / 2 * 1.3), 5, healthBar, 15);
-        ctx.strokeStyle = "rgb(50,50,50)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect((canvasGame.width / 2 * 1.3), 5, lifeBar, 15);
+        ctxui.fillStyle = "rgba(40, 200, 0, 1)";
+        ctxui.fillRect((canvasGame.width / 2 * 1.3), 5, healthBar, 15);
+        ctxui.strokeStyle = "rgb(50,50,50)";
+        ctxui.lineWidth = 2;
+        ctxui.strokeRect((canvasGame.width / 2 * 1.3), 5, lifeBar, 15);
 
 
         let text = `${floornumber}F Lvl${player.level}          HP ${player.hp}/${player.maxHp}`
-        ctx.fillStyle = "rgba(250, 250, 250, 1)";
-        ctx.font = "bold 20px Arial";
-        ctx.fillText(text, 30, 20);
-        ctx.strokeStyle = "rgb(50,50,50)";
-        ctx.lineWidth = 1;
-        ctx.strokeText(text, 30, 20);
+        ctxui.fillStyle = "rgba(250, 250, 250, 1)";
+        ctxui.font = "bold 20px Arial";
+        ctxui.fillText(text, 30, 20);
+        ctxui.strokeStyle = "rgb(50,50,50)";
+        ctxui.lineWidth = 1;
+        ctxui.strokeText(text, 30, 20);
     }
 
     async function animatedDrawMap() {
         let step = 0;
-        for (let next = 10; next >= 0; next--) {
-            // sourceY = player.spriteDirection[0] < 0 ? 32 * 3 : (player.spriteDirection[1] < 0 ? 32 : (player.spriteDirection[1] > 0 ? 32 * 2 : 0));
-            let occurencecounter = [0, 0];
-            let animoccur = player.spriteDirection[0] < 0 ? [0, -next / 10] : (player.spriteDirection[1] < 0 ? [-next / 10, 0] : (player.spriteDirection[1] > 0 ? [next / 10, 0] : [0, next / 10]));
+        let nFrame = 10;
+        //next is the number of frames in an action
+        for (let next = nFrame; next >= 0; next--) {
 
+            let occurencecounter = [0, 0];
+
+            // check player direction and update the animation direction accordingly. next will be the frame at which we are.
+            let animoccur = player.spriteDirection[0] < 0 ? [0, -next / nFrame] : (player.spriteDirection[1] < 0 ? [-next / nFrame, 0] : (player.spriteDirection[1] > 0 ? [next / nFrame, 0] : [0, next / nFrame]));
+
+            
+
+            //temporary canvases
             let buffer = document.createElement("canvas");
             buffer.width = canvasGame.width;
             buffer.height = canvasGame.height;
             let bufferCtx = buffer.getContext("2d");
-            bufferCtx.imageSmoothingEnabled = false;
             bufferCtx.willReadFrequently = true;
             let enemiesCopy = enemies;
 
-            let vz = viewZoom / 2; //number of tiles on each side of the player
-            let posXminus = player.posX - vz < 0 ? 0 : player.posX - vz;
-            let posYminus = player.posY - vz < 0 ? 0 : player.posY - vz;
-            let posXmax = player.posX + vz + 1 > mPos ? mPos : player.posX + vz + 1;
-            let posYmax = player.posY + vz + 1 > mPos ? mPos : player.posY + vz + 1; //layerBG[posXmax].length = mPos
+            let vz = viewZoom / 2; // center view on player (half the tiles on the right, half on the left)
+            let posXminus = player.posX - vz < 0 ? 0 : player.posX - vz; // get the start position in X for the map, if negative then out of world (set to 0)
+            let posYminus = player.posY - vz < 0 ? 0 : player.posY - vz; // get the start position in Y for the map, if negative then out of world (set to 0)
+            let posXmax = player.posX + vz + 1 > mPos ? mPos : player.posX + vz + 1; // get the max position in X for the map, if greater than the map size then set to map size
+            let posYmax = player.posY + vz + 1 > mPos ? mPos : player.posY + vz + 1; // get the max position in Y for the map, if greater than the map size then set to map size
 
             let sourceY = 0;
             let sourceX = 0;
-
-            if (posXminus === 0 && posXmax + vz - player.posX < mPos) {
+            
+            // if min X is  0 (start of map) then apply offset to max X equal to lost number of tiles on the left side. This is to even out the loss and gain on both sides
+            if (posXminus === 0 && posXmax + vz - player.posX < mPos) { 
                 posXmax += vz - player.posX;
             }
+            // if min Y is 0 (start of map) then apply offset to max Y equal to lost number of tiles on the top side. This is to even out the loss and gain on both sides
             if (posYminus === 0 && posYmax + vz - player.posY < mPos) { // layerBG[posXmax].length 
                 posYmax += vz - player.posY;
             }
-            let canvaswidth = Math.floor(ctx.canvas.width / viewZoom) + 1; //+1 to avoid erasing last line if room is max sizeof map
-            let canvasheight = Math.floor(ctx.canvas.height / viewZoom) + 1;
+            
+            let canvaswidth = Math.floor(ctx.canvas.width / viewZoom) + 1; // +1 to avoid erasing last line if room is max sizeof map and avoid having no wall after the room
+            let canvasheight = Math.floor(ctx.canvas.height / viewZoom) + 1; // same as above but for height
 
-            if (animoccur[0] > 0 || animoccur[1] > 0) {
-                let imgD = ctx.getImageData(0, 0, (animoccur[0] > 0 ? (animoccur[0] * canvaswidth * 64) : ctx.canvas.width), (animoccur[1] > 0 ? (animoccur[1] * canvasheight * 64) : ctx.canvas.height));
-                ctx.putImageData(imgD, 0, 0)
+            let imgD = undefined;
+
+            // TODO : a smaaaall bit of sprite is wrong, to fix.
+            // ? INFO : this part is responsible to draw the left or top part of the map when moving right or down. it fixes a graphic bug
+            // ?        For example a down movement: the top tile is gonna disappear bit by bit drawn on top by the one under that goes up.
+            // ?        But then you take notice that it makes an unusual effect where it seems like it gets eaten because it does not go up itself.
+            if (animoccur[0] > 0) {
+                // imgD stands for image data, which is used to store the current canvas content that will just be re added with a padding to create the animation effect without recalculating.
+                // we can do nFrame/next because we check > 0 above
+                imgD = ctx.getImageData(canvaswidth * 1/ nFrame, 0, canvaswidth * nFrame/next,  ctx.canvas.height);
+            } else if ( animoccur[1] > 0) {
+                imgD = ctx.getImageData(0, canvasheight * 1/nFrame, ctx.canvas.width, canvasheight * nFrame/next);
             }
 
 
-            // Clear the entire canvas
-            ctx.clearRect((animoccur[0] > 0 ? (animoccur[0] / 10 * canvaswidth * 64) : 0), (animoccur[1] > 0 ? (animoccur[1] / 10 * canvasheight * 64) : 0), canvasGame.width, canvasGame.height);
 
-            // Clear the entire canvas
+            // ? INFO : Clear Not needed because no drop of performance or ram usage difference were found between overdraw and clear then draw when tested.
+            // // Clear the entire canvas
+            // ctx.clearRect(0, 0, canvasGame.width, canvasGame.height);
+            if (imgD !==  undefined) {
+                ctx.putImageData(imgD, 0, 0);
+            }
+
+            // Clear the entire character canvas
             ctxchar.clearRect(0, 0, canvasGame.width, canvasGame.height);
 
             for (let i = posXminus; i < posXmax; i++) {
                 for (let j = posYminus; j < posYmax; j++) {
+
+                    //choose the sprite to draw based on the value in the layerBG array
                     switch (layerBG[i][j]) {
                         case 2:
                             sourceY = 32;
@@ -770,8 +795,10 @@ export default async function Game() {
 
                     //draw the background
                     ctx.drawImage(tileAtlas, sourceX, sourceY, tileSizeMap, tileSizeMap, (animoccur[0] + occurencecounter[0]) * canvaswidth, (animoccur[1] + occurencecounter[1]) * canvasheight, canvaswidth, canvasheight);
+                    
                     if (layerItems[i][j] !== undefined) {
                         let item = layerItems[i][j];
+                        // the  + 0.04 is to add a slight offset to the item position to avoid overlapping on other tiles
                         ctxchar.drawImage(item.spriteSheet, item.SSposX, item.SSposY, item.SSsize, item.SSsize, (animoccur[0] + occurencecounter[0] + 0.04*i/posXmax) * canvaswidth, (animoccur[1] + occurencecounter[1] + 0.04*j/posYmax) * canvasheight, canvaswidth, canvasheight);
                     }
                     if (layerCharacters[i][j] !== undefined) {
@@ -848,10 +875,6 @@ export default async function Game() {
                             }
                         }
                     }
-                    // else if (layerItems[i][j] !== undefined) {
-                    //     let item = layerItems[i][j];
-                    //     bufferCtx.drawImage(item.spriteSheet, 0, 0, 16, 16,(animoccur[0] + occurencecounter[0])* canvaswidth,(animoccur[1] + occurencecounter[1])* canvasheight, canvaswidth, canvasheight);
-                    // }
 
                     for (let xAdd = posXmax - posXminus; xAdd < parseInt(canvasGame.style.width) / 32; xAdd++) {
                         bufferCtx.drawImage(tileAtlas, 32 * 4, 32 * 2, tileSizeMap, tileSizeMap, xAdd * canvaswidth, (animoccur[1] + occurencecounter[1]) * canvasheight, canvaswidth, canvasheight);

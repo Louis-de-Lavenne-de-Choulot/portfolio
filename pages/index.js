@@ -29,11 +29,11 @@ function HomePage() {
       </span>
       </div>
       <div id="image_map">
-        <canvas id="canvass" style={{ height: '700px', width: '700px', imageRendering: 'pixelated' }}></canvas>
+        <canvas id="canvass" style={{ imageRendering: 'pixelated' }}></canvas>
         {/* create overlapping canvas with id "Characters" to display the UI */}
-        <canvas id="characters" style={{ height: '700px', width: '700px', imageRendering: 'pixelated' }}></canvas>
+        <canvas id="characters" style={{  imageRendering: 'pixelated' }}></canvas>
         {/* create overlapping canvas with id "UI" to display the UI */}
-        <canvas id="ui" style={{ height: '700px', width: '700px', imageRendering: 'pixelated' }}></canvas>
+        <canvas id="ui" style={{ imageRendering: 'pixelated' }}></canvas>
       </div>
       </span>
       {/* affichage du cv traditionnnel en format public\Louis de Lavenne de Choulot.pdf*/}
