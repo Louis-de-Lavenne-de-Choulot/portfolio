@@ -11,9 +11,8 @@ export default async function Game() {
     let canvasGame = document.getElementById("canvass");
     let canvasCharacter = document.getElementById("characters");
     let canvasUI = document.getElementById("ui");
-    let normMapSize = 3000;
-    let size = 54;
-    let mPos = Math.floor(normMapSize / size);
+    //determine the size of the map, min ~20x20
+    let mPos = 50;
     let canvasSIZE = 1000;
     let viewZoom = 10;
 
@@ -61,48 +60,6 @@ export default async function Game() {
 
     if (document.getElementById("pseudo") !== null) {
         player.name = document.getElementById("pseudo").innerText;
-    }
-
-    class Enemy {
-        constructor(name, posX, posY, dir, enemySpriteSheet, hp, maxHp, attack, defense, range, level, affected, xp, xpToNextLevel, xpMultiplier, gold, inventory, equipped, color) {
-            this.name = name;
-            this.posX = posX;
-            this.posY = posY;
-            this.dir = dir;
-            this.enemySpriteSheet = enemySpriteSheet;
-            this.hp = hp;
-            this.maxHp = maxHp;
-            this.attack = attack;
-            this.defense = defense;
-            this.range = range;
-            this.level = level;
-            this.affected = affected;
-            this.gotHit = false;
-            this.hasAttacked = false;
-            this.xp = xp;
-            this.xpToNextLevel = xpToNextLevel;
-            this.xpMultiplier = xpMultiplier;
-            this.gold = gold;
-            this.inventory = inventory;
-            this.equipped = equipped;
-            this.color = color;
-        }
-    }
-
-    class Projectile {
-        constructor(name, owner, posX, posY, direction, damage, additionalDamage, duration, numberOfChildren, lifetime, color) {
-            this.name = name;
-            this.owner = owner;
-            this.posX = posX;
-            this.posY = posY;
-            this.direction = direction;
-            this.damage = damage;
-            this.additionalDamage = additionalDamage;
-            this.duration = duration;
-            this.numberOfChildren = numberOfChildren; //up right down left
-            this.lifetime = lifetime;
-            this.color = color; //? to be sprite
-        }
     }
 
     class Item {
@@ -170,10 +127,6 @@ export default async function Game() {
     let floornumber = 1;
     // array of enemy objects
     let enemies = [];
-    // array of items
-    let items = [];
-    // array of projectiles
-    let projectiles = [];
 
     let floorEnemies = [];
     let floorItems = [];
@@ -198,14 +151,11 @@ export default async function Game() {
     let notifBoxDrawn = false;
     let closeNotifCtdwn = 0;
 
-    let atlasCols = 5;
-    let atlasRows = 5;
     let tileSizeMap = 32;
 
     let ctx;
     let ctxchar;
     let ctxui;
-    let maxH;
     let startH;
     let drawHeight;
     let drop = 25;
@@ -222,7 +172,6 @@ export default async function Game() {
         ["Items", player.inventory],
         ["Team", teamOptions],
         ["Pick up", pickUp],
-        ["Rest", rest]
     ]; //, ["Others", otherOptions]
     let currentOptions = menuOptions;
 
@@ -232,11 +181,9 @@ export default async function Game() {
     var audio = new Audio('/gameSound/magicSchool.ogg');
 
     let allItems;
-    let armors;
     let allEnemies;
-    let effects;
     let floors;
-    let skills;
+    let maxH;
     let characters;
     let action_in_progress = false;
 
@@ -247,27 +194,6 @@ export default async function Game() {
         }
         );
 
-    // Fetch the armors.json file
-    await fetch('/gameLogic/armors.json')
-        .then(response => response.text())
-        .then(data => {
-            armors = JSON.parse(data);
-        });
-
-    // Fetch the enemies.json file
-    await fetch('/gameLogic/enemies.json')
-        .then(response => response.json())
-        .then(data => {
-            allEnemies = data;
-        });
-
-    // Fetch the effects.json file
-    await fetch('/gameLogic/effects.json')
-        .then(response => response.json())
-        .then(data => {
-            effects = data;
-        });
-
     // Fetch the floors.json file
     await fetch('/gameLogic/floors.json')
         .then(response => response.json())
@@ -275,12 +201,6 @@ export default async function Game() {
             floors = data;
         });
 
-    // Fetch the skills.json file
-    await fetch('/gameLogic/skills.json')
-        .then(response => response.json())
-        .then(data => {
-            skills = data;
-        });
 
     // Fetch the characters.json file
     await fetch('/gameLogic/characters.json')
@@ -307,17 +227,12 @@ export default async function Game() {
     maxH = canvasGame.height - 50;
     startH = canvasGame.height - 200;
     drawHeight = canvasGame.height - 200;
-    generateRooms();
 
     function characterLoader(character) {
         //load player
         let chara = Object.values(characters).find(obj => obj.name === character);
         player.hp = chara.hp;
         player.maxHp = chara.maxHp;
-        for (let i = 0; i < chara.skills.length; i++) {
-            let skill = Object.values(skills).find(obj => obj.name === chara.skills[i]);
-            player.skills.push([skill.name, attack, structuredClone(skill)]);
-        }
         menuOptions[0][1] = player.skills;
         player.defense = chara.defense;
         player.attackPower = chara.attackPower;
@@ -336,35 +251,30 @@ export default async function Game() {
     // treasure chest download cv
     // add a menu to select the character
 
-    function generateRooms() {
-        let roomNumber = Math.floor(Math.random() * 20) + 10;
-        for (let i = 0; i < roomNumber; i++) {
-            let roomX = Math.floor(Math.random() * 11) + 5;
-            let roomY = Math.floor(Math.random() * 11) + 5;
-            rooms.push([roomX, roomY]);
-        }
-    }
 
     function drawRooms() {
-        //start from the top left and move randomly in places without rooms
-        for (let i = 0; i < rooms.length; i++) {
-            //room sizes
-            let sizeX = rooms[i][0];
-            let sizeY = rooms[i][1];
-            // posX and posY are the top and left points
-            let posX = Math.floor(Math.random() * (mPos - sizeX));
-            let posY = Math.floor(Math.random() * (mPos - sizeY));
+        //define room size
+        let roomSize = Math.floor(Math.random() * (15 - 10 + 1)) + 5;
+        let nRooms = 5
+
+        //place rooms in the grid
+        for (let i = 0; i < nRooms; i++) {
+            let posX = Math.floor(Math.random() * (50 - 2 * roomSize - 5)) + 5 + roomSize;
+            let posY = Math.floor(Math.random() * (50 - 2 * roomSize - 5)) + 5 + roomSize;
+            let sizeX = roomSize;
+            let sizeY = roomSize;
 
             //check if the room is in bounds and if it is not in another room
-            let inBounds = posX >= 0 && posX + sizeX <= mPos && posY >= 0 && posY - sizeY <= mPos;
+            let inBounds = posX >= 0 && posX + sizeX <= 50 && posY >= 0 && posY - sizeY <= 50;
 
-            // check if room is overlapping
+            //check if room is overlapping
             let inRoom = false;
             for (let j = 0; j < usedPosBounds.length; j++) {
                 if (checkOverlap(posX, posY, sizeX, sizeY, usedPosBounds[j][0], usedPosBounds[j][1], usedPosBounds[j][2], usedPosBounds[j][3])) {
                     inRoom = true;
                 }
             }
+
             //if the room is in bounds and not in another room then draw it
             if (!inRoom && inBounds) {
                 for (let j = 0; j <= sizeX; j++) {
@@ -399,7 +309,6 @@ export default async function Game() {
             for (let i = 0; i <= mPos; i++) {
                 layerBG[i] = new Uint8Array(mPos + 1);
             }
-            generateRooms();
             drawRooms();
         }
     }
@@ -624,12 +533,6 @@ export default async function Game() {
 
     async function dynamicDrawNotifs() {
         drawHeight += drop;
-        if (drawHeight >= maxH) {
-            drawHeight = startH + drop;
-            //get back to the canvas without the notifications
-            ctxui.clearRect(canvasGame.width / 8, canvasGame.height - 200, (canvasGame.width / 8) * 6, 150);
-            notifBoxDrawn = false;
-        }
         if (!notifBoxDrawn) {
             ctxui.fillStyle = "rgba(100, 100, 100, .5)";
             ctxui.fillRect(canvasGame.width / 8, canvasGame.height - 200, (canvasGame.width / 8) * 6, 150);
@@ -638,7 +541,7 @@ export default async function Game() {
             ctxui.strokeRect(canvasGame.width / 8, canvasGame.height - 200, (canvasGame.width / 8) * 6, 150);
             notifBoxDrawn = true;
         }
-        closeNotifCtdwn = 3;
+        closeNotifCtdwn = 1;
     }
 
     async function drawNotif(txt, color) {
@@ -685,7 +588,7 @@ export default async function Game() {
             // check player direction and update the animation direction accordingly. next will be the frame at which we are.
             let animoccur = player.spriteDirection[0] < 0 ? [0, -next / nFrame] : (player.spriteDirection[1] < 0 ? [-next / nFrame, 0] : (player.spriteDirection[1] > 0 ? [next / nFrame, 0] : [0, next / nFrame]));
 
-            
+
 
             //temporary canvases
             let buffer = document.createElement("canvas");
@@ -703,16 +606,16 @@ export default async function Game() {
 
             let sourceY = 0;
             let sourceX = 0;
-            
+
             // if min X is  0 (start of map) then apply offset to max X equal to lost number of tiles on the left side. This is to even out the loss and gain on both sides
-            if (posXminus === 0 && posXmax + vz - player.posX < mPos) { 
+            if (posXminus === 0 && posXmax + vz - player.posX < mPos) {
                 posXmax += vz - player.posX;
             }
             // if min Y is 0 (start of map) then apply offset to max Y equal to lost number of tiles on the top side. This is to even out the loss and gain on both sides
             if (posYminus === 0 && posYmax + vz - player.posY < mPos) { // layerBG[posXmax].length 
                 posYmax += vz - player.posY;
             }
-            
+
             let canvaswidth = Math.floor(ctx.canvas.width / viewZoom) + 1; // +1 to avoid erasing last line if room is max sizeof map and avoid having no wall after the room
             let canvasheight = Math.floor(ctx.canvas.height / viewZoom) + 1; // same as above but for height
 
@@ -725,9 +628,9 @@ export default async function Game() {
             if (animoccur[0] > 0) {
                 // imgD stands for image data, which is used to store the current canvas content that will just be re added with a padding to create the animation effect without recalculating.
                 // we can do nFrame/next because we check > 0 above
-                imgD = ctx.getImageData(canvaswidth * 1/ nFrame, 0, canvaswidth * nFrame/next,  ctx.canvas.height);
-            } else if ( animoccur[1] > 0) {
-                imgD = ctx.getImageData(0, canvasheight * 1/nFrame, ctx.canvas.width, canvasheight * nFrame/next);
+                imgD = ctx.getImageData(canvaswidth * 1 / nFrame, 0, canvaswidth * nFrame / next, ctx.canvas.height);
+            } else if (animoccur[1] > 0) {
+                imgD = ctx.getImageData(0, canvasheight * 1 / nFrame, ctx.canvas.width, canvasheight * nFrame / next);
             }
 
 
@@ -735,7 +638,7 @@ export default async function Game() {
             // ? INFO : Clear Not needed because no drop of performance or ram usage difference were found between overdraw and clear then draw when tested.
             // // Clear the entire canvas
             // ctx.clearRect(0, 0, canvasGame.width, canvasGame.height);
-            if (imgD !==  undefined) {
+            if (imgD !== undefined) {
                 ctx.putImageData(imgD, 0, 0);
             }
 
@@ -795,20 +698,21 @@ export default async function Game() {
 
                     //draw the background
                     ctx.drawImage(tileAtlas, sourceX, sourceY, tileSizeMap, tileSizeMap, (animoccur[0] + occurencecounter[0]) * canvaswidth, (animoccur[1] + occurencecounter[1]) * canvasheight, canvaswidth, canvasheight);
-                    
+
                     if (layerItems[i][j] !== undefined) {
                         let item = layerItems[i][j];
                         // the  + 0.04 is to add a slight offset to the item position to avoid overlapping on other tiles
-                        ctxchar.drawImage(item.spriteSheet, item.SSposX, item.SSposY, item.SSsize, item.SSsize, (animoccur[0] + occurencecounter[0] + 0.04*i/posXmax) * canvaswidth, (animoccur[1] + occurencecounter[1] + 0.04*j/posYmax) * canvasheight, canvaswidth, canvasheight);
+                        ctxchar.drawImage(item.spriteSheet, item.SSposX, item.SSposY, item.SSsize, item.SSsize, (animoccur[0] + occurencecounter[0] + 0.04 * i / posXmax) * canvaswidth, (animoccur[1] + occurencecounter[1] + 0.04 * j / posYmax) * canvasheight, canvaswidth, canvasheight);
                     }
                     if (layerCharacters[i][j] !== undefined) {
                         if (layerCharacters[i][j] === 1) {
-                            sourceY = player.spriteDirection[0] < 0 ? 32 * 3 : (player.spriteDirection[1] < 0 ? 32 : (player.spriteDirection[1] > 0 ? 32 * 2 : 0));
+                            let spriteSize = 233;
+                            sourceY = player.spriteDirection[0] < 0 ? spriteSize * 3 : (player.spriteDirection[1] < 0 ? spriteSize : (player.spriteDirection[1] > 0 ? spriteSize * 2 : 0));
                             if (next % 3 === 0 && next !== 0)
                                 step = next / 3;
                             if (step > 2)
                                 step = 0;
-                            sourceX = step * 32;
+                            sourceX = step * spriteSize;
 
                             //draw small green circle of low opacity on the tile
                             //add the circle without interior but with border
@@ -821,7 +725,7 @@ export default async function Game() {
                             ctxchar.stroke();
                             ctxchar.fill();
                             ctxchar.closePath();
-                            ctxchar.drawImage(player.spriteSheet, sourceX, sourceY, tileSizeMap, tileSizeMap, occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
+                            ctxchar.drawImage(player.spriteSheet, sourceX, sourceY, spriteSize, spriteSize, occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
 
                             if (player.gotHit) {
                                 const imageData = ctxchar.getImageData(occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
@@ -903,7 +807,7 @@ export default async function Game() {
             await new Promise(r => setTimeout(r, 25));
         }
         player.spriteDirection = [0, 0];
-        
+
         action_in_progress = false;
     }
 
@@ -1109,97 +1013,9 @@ export default async function Game() {
         return [posX, posY];
     }
 
-    function initItems(ignore, ex, ey) {
-        let itemTtle = Math.floor(Math.random() * usedPosBounds.length - 3);
-        let iteminst;
-        //randomly 1-10
-        for (let i = 0; i < itemTtle; i++) {
-            let itemT = Math.floor(Math.random() * 10) + 1;
-            let remember = 0;
-            for (let j = 0; j < InFloor.items.length; j++) {
-                if (InFloor.items[j][1] * 10 >= itemT) {
-                    iteminst = Object.values(allItems).find(obj => obj.id === InFloor.items[j][0]);
-                    remember = j;
-                } else {
-                    itemT -= InFloor.items[j][1] * 10;
-                }
-            }
-            items.push(floorItems[remember])
-        }
-
-        // random point in random room
-        while (items.length > 0) {
-            let item = items.pop();
-            let iS = spawn(ignore);
-            while (iS[0] === ex && iS[1] === ey) {
-                iS = spawn(ignore);
-            }
-            layerItems[iS[0]][iS[1]] = item;
-        }
-    }
-
-    function initEnemies(ignore, ex, ey) {
-        let enemyTtle = 0;
-        //randomly spawn enemies room * random(0-4)
-        for (let i = 1; i < usedPosBounds.length - 1; i++) {
-
-            if (i === ignore) {
-                continue;
-            }
-            let numbEnemy = Math.floor(Math.random() * 4);
-            for (let j = 0; j < numbEnemy; j++) {
-
-                //get a point in the room
-                let eS = getPointInRoom(i);
-                while (eS[0] === ex && eS[1] === ey) {
-                    eS = getPointInRoom(i);
-                }
-
-                //randomly 1-10
-                let enemyT = Math.floor(Math.random() * 10) + 1;
-                let enemyinst;
-                let remember = 0;
-                for (let k = 0; k < InFloor.monsters.length; k++) {
-                    if (InFloor.monsters[k][1] * 10 >= enemyT) {
-                        enemyinst = Object.values(allEnemies).find(obj => obj.id === InFloor.monsters[k][0]);
-                        remember = k;
-                        break;
-                    } else {
-                        enemyT -= InFloor.monsters[k][1] * 10;
-                    }
-                }
-
-                // layerCharacters[eS[0]][eS[1]] = enemyTtle + 2;
-                // enemyTtle++;
-
-                let mobLevel = Math.floor(Math.random() * 3) - 1;
-                let spriteSheet = new Image();
-                spriteSheet.src = "image/maps/Characters/Enemy/" + enemyinst.sprite;
-                mobLevel += enemyinst.level
-                if (mobLevel <= 0)
-                    mobLevel = 1;
-                let mobXPMult = twoAfterComma(twoAfterComma(Math.random() - 0.5) + enemyinst.xpMultiplier);
-                let mobMaxHP = twoAfterComma(enemyinst.hp * (mobLevel * mobXPMult));
-                let mobXPToNextLevel = twoAfterComma((enemyinst.xpToNextLevel > 1 ? enemyinst.xpToNextLevel : 1) * (mobLevel * mobXPMult));
-                let en = new Enemy(enemyinst.name, eS[0], eS[1], 0, floorEnemies[remember], mobMaxHP, mobMaxHP, enemyinst.attack, enemyinst.defense, enemyinst.range, mobLevel, [], 0, mobXPToNextLevel, mobXPMult, enemyinst.gold, enemyinst.hold, enemyinst.equipped, enemyinst.color);
-                enemies.push(en);
-                layerCharacters[eS[0]][eS[1]] = enemies[enemies.length - 1];
-            }
-        }
-    }
-
     function initGame() {
         //reset all audio
         audio.pause();
-        //load current InFloor
-        InFloor = Object.values(floors).find(obj => obj.id === floornumber);
-        //load images enemies
-        for (let i = 0; i < InFloor.monsters.length; i++) {
-            let enemy = Object.values(allEnemies).find(obj => obj.id === InFloor.monsters[i][0]);
-            let en = new Image();
-            en.src = "image/maps/Characters/Enemy/" + enemy.sprite;
-            floorEnemies.push(en);
-        }
 
         let arrowup;
         let arrowdown;
@@ -1259,9 +1075,7 @@ export default async function Game() {
             // toavoid.push(exS[2]);
         }
 
-        // initEnemies(pS[2], exS[0], exS[1]);
-        // initItems(pS[2], exS[0], exS[1]);
-        drawMap();
+        animatedDrawMap();
         audio = new Audio('gameSound/magicSchool.ogg');
         audio.play();
         audio.loop = true;
@@ -1274,8 +1088,8 @@ export default async function Game() {
         updatePlayer();
         // updateProjectiles();
         updateCollision();
-        if (moved&&!fastInput) {
-                animatedDrawMap();
+        if (moved && !fastInput) {
+            animatedDrawMap();
         } else {
             drawMap();
         }
@@ -1289,177 +1103,6 @@ export default async function Game() {
         }
     }
 
-    function updateEnemies() {
-        let newProjectiles = [];
-        for (let i = 0; i < enemies.length; i++) {
-            let e = enemies[i];
-
-            if (e.hp <= 0) {
-
-                //without friendly fire for now
-                player.xp += twoAfterComma(10 * twoAfterComma((e.level * 1.5) / player.level));
-                document.getElementById("xp").innerHTML = `XP: ${player.xp}/${player.xpToNextLevel} \n Level enemy : ${e.level}`;
-
-                while (player.xp >= player.xpToNextLevel) {
-                    player.level++
-                    player.hp += player.maxHp * (twoAfterComma(25 * player.xpMultiplier) / 100);
-                    player.maxHp += player.maxHp * (twoAfterComma(25 * player.xpMultiplier) / 100);
-                    player.defense = twoAfterComma(player.defense === 0 ? player.xpMultiplier : player.defense * player.xpMultiplier);
-                    player.attackPower = twoAfterComma(player.attackPower === 0 ? player.attackPower : player.attackPower * player.xpMultiplier);
-                    player.xp -= player.xpToNextLevel;
-                    player.xpToNextLevel = twoAfterComma(player.xpToNextLevel * player.xpMultiplier);
-                }
-
-                //remove from layerCharacters
-                layerCharacters[e.posX][e.posY] = undefined;
-                //remove from enemies
-                enemies.splice(i, 1);
-                continue;
-            }
-
-            // clean the previous position
-            layerCharacters[e.posX][e.posY] = undefined;
-            let p = player;
-            let diffX = e.posX - p.posX;
-            let diffY = e.posY - p.posY;
-            let direction = Math.abs(diffX) > Math.abs(diffY) ? 'horizontal' : 'vertical';
-            let length = direction === 'horizontal' ? Math.abs(diffX) : Math.abs(diffY);
-
-            //IMPLEMENT LIMITED VISION
-            let rcst = false;
-            if (length < 9) {
-                //if in range then attack
-                if (length <= e.range) {
-                    //attack
-                    e.hasAttacked = true;
-                    if (Math.abs(diffX) === Math.abs(diffY)) {
-                        newProjectiles.push(new Projectile("blunt attack", e, e.posX - diffX, e.posY - diffY, [diffX, diffY], e.attack, 0, 0, 0, 1, e.color));
-                    } else if (direction === 'horizontal') {
-                        newProjectiles.push(new Projectile("blunt attack", e, e.posX - diffX, e.posY, [diffX, 0], e.attack, 0, 0, 0, 1, e.color));
-                    } else {
-                        newProjectiles.push(new Projectile("blunt attack", e, e.posX, e.posY - diffY, [0, diffY], e.attack, 0, 0, 0, 1, e.color));
-                    }
-                    layerCharacters[e.posX][e.posY] = e;
-                    continue;
-                }
-                //raycast to check if a wall is in the way
-                for (let j = 1; j < length + 1; j++) {
-                    //take diagonal into acoccurencecounter
-                    if (direction === 'horizontal') {
-                        if (diffX > 0 && layerBG[e.posX - j][e.posY] > 9) {
-                            rcst = true;
-                            break;
-                        } else if (diffX < 0 && layerBG[e.posX + j][e.posY] > 9) {
-                            rcst = true;
-                            break;
-                        }
-                    } else if (direction === 'vertical') {
-                        if (diffY > 0 && layerBG[e.posX][e.posY - j] > 9) {
-                            rcst = true;
-                            break;
-                        } else if (diffY < 0 && layerBG[e.posX][e.posY + j] > 9) {
-                            rcst = true;
-                            break;
-                        }
-                    } else {
-                        if (diffX > 0 && diffY > 0 && layerBG[e.posX - j][e.posY - j] > 9) {
-                            rcst = true;
-                            layerBG[e.posX - j][e.posY - j] = 1;
-                            break;
-                        } else if (diffX < 0 && diffY > 0 && layerBG[e.posX + j][e.posY - j] > 9) {
-                            rcst = true;
-                            layerBG[e.posX + j][e.posY - j] = 1;
-                            break;
-                        } else if (diffX > 0 && diffY < 0 && layerBG[e.posX - j][e.posY + j] > 9) {
-                            rcst = true;
-                            layerBG[e.posX - j][e.posY + j] = 1;
-                            break;
-                        } else if (diffX < 0 && diffY < 0 && layerBG[e.posX + j][e.posY + j] > 9) {
-                            rcst = true;
-                            layerBG[e.posX + j][e.posY + j] = 1;
-                            break;
-                        }
-                    }
-                }
-                if (length > Math.abs(e.range) && !rcst) {
-                    if (direction === 'horizontal') {
-                        if (diffX > 0) {
-                            e.posX--;
-                        } else {
-                            e.posX++;
-                        }
-                    } else {
-                        if (diffY > 0) {
-                            e.posY--;
-                        } else {
-                            e.posY++;
-                        }
-                    }
-                }
-            }
-            if (length > Math.abs(e.range) || rcst) {
-                let possibleMoves = [];
-                for (let i = -1; i < 2; i++) {
-                    for (let j = -1; j < 2; j++) {
-                        if (i === 0 && j === 0) {
-                            continue;
-                        }
-                        if (e.posX + i < 0 || e.posY + j < 0)
-                            continue;
-                        if (layerBG[e.posX + i][e.posY + j] < 10 && layerCharacters[e.posX + i][e.posY + j] === undefined) {
-                            possibleMoves.push([i, j]);
-                        }
-                    }
-                }
-                let move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-                e.posX += move[0];
-                e.posY += move[1];
-            }
-            // change e.dir to the direction the enemy is facing 0 = down, 1 = left, 2 = right, 3 = up
-            let diffX2 = e.posX - p.posX;
-            let diffY2 = e.posY - p.posY;
-            if (diffX2 === 0 && diffY2 === 0) {
-                e.dir = 0;
-            } else if (Math.abs(diffX2) > Math.abs(diffY2)) {
-                if (diffX2 > 0) {
-                    e.dir = 1;
-                } else {
-                    e.dir = 2;
-                }
-            } else {
-                if (diffY2 > 0) {
-                    e.dir = 3;
-                } else {
-                    e.dir = 0;
-                }
-            }
-            layerCharacters[e.posX][e.posY] = e;
-        }
-        return newProjectiles;
-    }
-
-    function updateProjectiles() {
-        for (let i = 0; i < projectiles.length; i++) {
-            let p = projectiles[i];
-            if (p.lifetime === 0 || p.posX - p.direction < 0 ||
-                p.posY - p.direction[1] < 0 || p.posX - p.direction > mPos || p.posY - p.direction[1] > mPos) {
-                if (p.numberOfChildren > 0) {
-                    for (let j = 0; j < p.numberOfChildren; j++) {
-                        projectiles.push(new Projectile(p.name, p.posX, p.posY, p.direction, p.damage, p.additionalDamage, p.duration, 0, p.lifetime, p.color));
-                    }
-                }
-                projectiles.splice(i, 1);
-                continue;
-            }
-            p.lifetime--;
-
-            p.posX -= p.direction[0];
-            p.posY -= p.direction[1];
-
-            // document.getElementById(p.posX + "_" + p.posY).style.fill = p.color;
-        }
-    }
-
     function updateCollision() {
         let p = player;
         for (let i = 0; i < projects.length; i++) {
@@ -1467,6 +1110,10 @@ export default async function Game() {
             let diffX = e.posX - p.posX;
             let diffY = e.posY - p.posY;
             if (diffX === 0 && diffY === 0) {
+                drawHeight = startH + drop;
+                //get back to the canvas without the notifications
+                ctxui.clearRect(canvasGame.width / 8, canvasGame.height - 200, (canvasGame.width / 8) * 6, 150);
+                notifBoxDrawn = false;
                 dynamicDrawNotifs();
                 drawNotif(`You reached the project :`, `${e.color}`);
                 dynamicDrawNotifs();
@@ -1479,34 +1126,6 @@ export default async function Game() {
                 nFloor = false;
             }
         }
-        for (let i = 0; i < projectiles.length; i++) {
-            let pr = projectiles[i];
-            if (pr.posX === p.posX && pr.posY === p.posY) {
-                stopInputs = true;
-                setTimeout(() => {
-                    stopInputs = false;
-                }, 250);
-                //? temp formula : ((25*(level-1)*power)/power + power - defense) => 25% multiplier per level
-                let damages = Math.floor((25 * pr.owner.level * pr.damage) / 100 + pr.damage - p.defense);
-                p.hp -= damages;
-                p.gotHit = true;
-                dynamicDrawNotifs();
-                drawNotif(`You got hit by a ${pr.name} for ${damages} damage !`, "rgba(230, 120, 0, 1)");
-                if (p.hp <= 0) {
-                    death();
-                }
-            }
-            if (layerCharacters[pr.posX][pr.posY] !== undefined && layerCharacters[pr.posX][pr.posY] > 1) {
-                enemies.forEach(en => {
-                    if (en.posX === pr.posX && en.posY === pr.posY) {
-                        en.hp -= pr.damage;
-                        en.gotHit = true;
-                        // if (pr.duration > 0 && additionalDamage > 0)
-                        // smth is wrong with the way enemies store effects
-                    }
-                });
-            }
-        }
     }
 
     function updatePlayer() { }
@@ -1515,90 +1134,9 @@ export default async function Game() {
         nFloor = true;
     }
 
-    function attack(s) {
-        if (s.pp <= 0)
-            return "nope";
-        s.pp--;
-        if (s.aoe) {
-            let poses = [];
-            for (let i = 0; i <= s.range; i++) {
-                if (i !== 0) {
-                    for (let n = -i; n <= i; n++) {
-                        poses.push([
-                            [player.posX + n],
-                            [player.posY + i]
-                        ]);
-                        poses.push([
-                            [player.posX + n],
-                            [player.posY - i]
-                        ]);
-                    }
-                    for (let n = -i + 1; n <= i - 1; n++) {
-                        poses.push([
-                            [player.posX + i],
-                            [player.posY + n]
-                        ]);
-                        poses.push([
-                            [player.posX - i],
-                            [player.posY + n]
-                        ]);
-                    }
-                }
-            }
-
-            for (let i = 0; i < enemies.length; i++) {
-                for (let n = 0; n < poses.length; n++) {
-                    if (enemies[i].posX === poses[n][0] && enemies[i].posY === poses[n][1]) {
-                        let damages = Math.floor((25 * player.level * player.attackPower * s.power) / 100 + s.power - enemies[i].defense);
-                        let miss = Math.floor(Math.random() * 101) > s.accuracy;
-                        enemies[i].hp -= miss ? 0 : damages;
-
-                        dynamicDrawNotifs();
-                        drawNotif((miss ? `You missed` : `You dealt ${damages} damages to ${enemies[i].name} !`), "rgba(120, 230, 0, 1)");
-                        enemies[i].gotHit = true;
-                        if (s.effects !== 0) {
-                            s.effects.forEach(effect => {
-                                if (Math.floor(Math.random() * 100) < effect[1]) {
-                                    enemies[i].affected.push(effect[0]);
-                                    dynamicDrawNotifs();
-                                    drawNotif(`${enemies[i].name} is now ${effect[0]}`, "rgba(120, 230, 0, 1)");
-                                }
-                            })
-                        }
-                        continue;
-                    }
-                }
-            }
-        }
-        notifBoxDrawn = false;
-    }
-
     async function backMenu() {
         UIMODE -= 1;
         interfaceUI(0);
-    }
-
-    async function rest() {
-        stopInputs = true;
-        let sleepTime = Math.floor(Math.random() * 5) + 2;
-        while (sleepTime > 0) {
-            dynamicDrawNotifs();
-            drawNotif(`you are sleeping...`, "rgba(120, 0, 230, 1)");
-            update();
-            await new Promise(r => setTimeout(r, 1000));
-            sleepTime--;
-        }
-        for (let s = 0; s < player.skills.length; s++) {
-            player.skills[s][2].pp += Math.floor((25 * player.skills[s][2].maxPP) / 100)
-            if (player.skills[s][2].pp > player.skills[s][2].maxPP)
-                player.skills[s][2].pp = player.skills[s][2].maxPP;
-        }
-        player.hp += Math.floor((1 * player.maxHp) / 100);
-        if (player.hp > player.maxHp)
-            player.hp = player.maxHp;
-        dynamicDrawNotifs();
-        drawNotif(`you woke up !`, "rgba(120, 0, 230, 1)");
-        stopInputs = false;
     }
 
     function pickUp() {
@@ -1652,18 +1190,6 @@ export default async function Game() {
         }
     }
 
-    function death() {
-        ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-        ctx.fillRect(0, 0, canvasGame.width, canvasGame.height);
-        ctx.fillStyle = "rgba(0, 0, 0, 1)";
-        ctx.font = "30px Arial";
-        ctx.fillText("You lose", canvasGame.width / 2 - 50, canvasGame.height / 2);
-        ctx.font = "20px Arial";
-        ctx.fillText("Press k to save score and restart", canvasGame.width / 2 - 50, canvasGame.height / 2 + 30);
-        //stop the js with a throw
-        throw new Error("You lose");
-    }
-
     function restart() {
         floornumber = 0;
         player.skills = [];
@@ -1687,23 +1213,6 @@ export default async function Game() {
                 return;
             }
         }
-        // nFloor = false;
-        // layerBG = [];
-        // layerCharacters = [];
-        // floorEnemies = [];
-        // projectiles = [];
-        // enemies = [];
-        // items = [];
-        // floorItems = [];
-        // layerItems = [];
-        // for (let i = 0; i <= mPos; i++) {
-        //     layerBG[i] = new Uint8Array(mPos + 1);
-        // }
-        // usedPosBounds = [];
-        // rooms = [];
-        // floornumber++;
-        // generateRooms();
-        // initGame();
     }
 
 
@@ -1764,11 +1273,11 @@ export default async function Game() {
         //remove all other events of arrow keys
         event.preventDefault();
         event.stopPropagation();
-        
+
         if (action_in_progress) {
             return;
         }
-        
+
         pressedkeys.forEach(element => {
             var name = element.toLowerCase();
             if (player.hp <= 0 || stopInputs) {
@@ -1785,6 +1294,10 @@ export default async function Game() {
                 case "z":
                 case "w":
                 case "arrowup":
+                    console.log(rooms);
+                    console.log(layerBG);
+                    console.log(layerCharacters);
+                    console.log(layerItems);
                     if (UIMODE === 0) {
                         player.spriteDirection[0] = -1;
                         movePlayer(0, -1);
@@ -1840,13 +1353,8 @@ export default async function Game() {
         });
     });
 
-    function twoAfterComma(int) {
-        return Math.round(int * 100) / 100;
-    }
-
     //onload
     characterLoader("Kraig");
-    generateRooms();
     //show image image/maps/line.png in the canvas
     let loading_img = new Image();
     loading_img.src = "image/logo.png";

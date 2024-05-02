@@ -12,6 +12,6 @@
         "xpMultiplier": 1.6,
         "gold": 0,
         "inventory": [],
-        "spriteSheet": "image/maps/KnightSheet.png"
+        "spriteSheet": "image/maps/spritesheet.png"
     }
 }

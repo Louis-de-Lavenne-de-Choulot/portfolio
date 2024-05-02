@@ -40,9 +40,6 @@ function HomePage() {
       <div style={{display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center", marginTop: "20vw", backgroundColor: "black"}}>
       <h3 id="subtitle">Download my CV</h3>
       <a href="/pdf/cv.pdf" download="Louis de Lavenne de Choulot.pdf">Download</a>
-      {/* previex */}
-      <iframe src="/pdf/cv.pdf" width="900px" height="1200px">
-      </iframe>
     </div>
     </div>
   );
