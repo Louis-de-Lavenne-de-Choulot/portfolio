@@ -9,14 +9,19 @@
 
 export default async function Game() {
     let canvasGame = document.getElementById("canvass");
+    let canvasItem = document.getElementById("items");
     let canvasCharacter = document.getElementById("characters");
     let canvasUI = document.getElementById("ui");
     //determine the size of the map, min ~20x20
-    let mPos = 50;
-    let canvasSIZE = 1000;
+    let normMapSize = 3000;
+    let size = 54;
+    let mPos = Math.floor(normMapSize / size);
+    let canvasSIZE = 700;
     let viewZoom = 10;
+    let letgo = 0;
 
-
+    let selectedChar = "Bulbasaur";
+    let animationQueue = {};
     let equiped = {
         weapon: null,
         armor: {
@@ -34,6 +39,7 @@ export default async function Game() {
 
     // player structure
     let player = {
+        name: "",
         posX: 0,
         posY: 0,
         hp: 0,
@@ -50,10 +56,11 @@ export default async function Game() {
         inventory: [],
         affected: [],
         equipped: equiped,
-        spriteSheet: new Image(),
+        spriteSheets: {},
         spriteDirection: Int8Array.from([0, 0]),
         // color: "rgb(0, 0, 255)",
     }
+
 
     let team = new Team("The basics", []);
 
@@ -154,6 +161,7 @@ export default async function Game() {
     let tileSizeMap = 32;
 
     let ctx;
+    let ctxitem;
     let ctxchar;
     let ctxui;
     let startH;
@@ -168,7 +176,6 @@ export default async function Game() {
     const teamOptions = team.allies;
     // const otherOptions = [["Save", save()], ["Quit", quit()]];
     const menuOptions = [
-        ["Moves", player.skills],
         ["Items", player.inventory],
         ["Team", teamOptions],
         ["Pick up", pickUp],
@@ -181,7 +188,6 @@ export default async function Game() {
     var audio = new Audio('/gameSound/magicSchool.ogg');
 
     let allItems;
-    let allEnemies;
     let floors;
     let maxH;
     let characters;
@@ -211,29 +217,45 @@ export default async function Game() {
 
 
     ctx = canvasGame.getContext('2d');
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.msImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
-    ctx.canvas.width = canvasSIZE;
-    ctx.canvas.height = canvasSIZE;
+    ctx.willReadFrequently = true;
+    ctxitem = canvasItem.getContext('2d');
+    ctxitem.mozImageSmoothingEnabled = false;
+    ctxitem.webkitImageSmoothingEnabled = false;
+    ctxitem.msImageSmoothingEnabled = false;
+    ctxitem.imageSmoothingEnabled = false;
+    ctxitem.willReadFrequently = true;
     ctxchar = canvasCharacter.getContext('2d');
+    ctxchar.mozImageSmoothingEnabled = false;
+    ctxchar.webkitImageSmoothingEnabled = false;
+    ctxchar.msImageSmoothingEnabled = false;
     ctxchar.imageSmoothingEnabled = false;
-    ctxchar.canvas.width = canvasSIZE;
-    ctxchar.canvas.height = canvasSIZE;
     ctxchar.willReadFrequently = true;
     ctxui = canvasUI.getContext('2d');
+    ctxui.mozImageSmoothingEnabled = false;
+    ctxui.webkitImageSmoothingEnabled = false;
+    ctxui.msImageSmoothingEnabled = false;
     ctxui.imageSmoothingEnabled = false;
-    ctxui.canvas.width = canvasSIZE;
-    ctxui.canvas.height = canvasSIZE;
     ctxui.willReadFrequently = true;
+
+    let canvaswidth = Math.floor(ctx.canvas.width / viewZoom);
+    let canvasheight = Math.floor(ctx.canvas.height / viewZoom);
+    let biggestSize = canvaswidth > canvasheight ? canvaswidth : canvasheight;
     maxH = canvasGame.height - 50;
     startH = canvasGame.height - 200;
     drawHeight = canvasGame.height - 200;
 
+
+
     function characterLoader(character) {
         //load player
-        let chara = Object.values(characters).find(obj => obj.name === character);
+        let chara = Object.values(characters).find(obj => obj.name == character);
+        player.name = chara.name;
         player.hp = chara.hp;
         player.maxHp = chara.maxHp;
-        menuOptions[0][1] = player.skills;
         player.defense = chara.defense;
         player.attackPower = chara.attackPower;
         player.level = chara.level;
@@ -242,8 +264,126 @@ export default async function Game() {
         player.xpMultiplier = chara.xpMultiplier;
         player.gold = chara.gold;
         player.inventory = chara.inventory;
-        player.spriteSheet.src = chara.spriteSheet;
         player.gotHit = false;
+        AddObjectAnimator(player.name);
+        SetBeforeDrawCallback(player.name, DrawCirclePlayer);
+        animationQueue[player.name].biggestPX = chara.sizeMultiplier;
+        chara.animations.forEach((anim) => {
+            if (!player.spriteSheets[anim.spriteSheetName]) {
+                let animImage = new Image();
+                animImage.src = anim.spriteSheetPath;
+                player.spriteSheets[anim.spriteSheetName] = animImage;
+                animImage.onload = function () {
+                    addCharacterAnimations(anim)
+                };
+                return;
+            }
+            addCharacterAnimations(anim)
+        });
+    }
+
+    function addCharacterAnimations(anim) {
+        let animData = []
+        let animData1 = []
+        let animData2 = []
+        let animData3 = []
+        let animData4 = []
+        let animData5 = []
+        let animData6 = []
+        let animData7 = []
+        let spriteInSpriteWidth = anim.spriteInSpriteWidth;
+        let spriteInSpriteHeight = anim.spriteInSpriteHeight;
+        let spWidth = player.spriteSheets[anim.spriteSheetName].naturalWidth;
+        let spHeight = player.spriteSheets[anim.spriteSheetName].naturalHeight;
+        let spriteInfos = getSpriteSizeInformations(player.spriteSheets[anim.spriteSheetName], spWidth, spHeight, spriteInSpriteWidth, spriteInSpriteHeight);
+
+        let spSW = spWidth / spriteInfos[0];
+        let spSY = spHeight / spriteInfos[1];
+
+        //we take the height from the anim.spriteHeightInSheet and then we do width/spS
+        for (let i = 0; i < spWidth; i += spSW) {
+            //here with 1025 pokemons, we decided to hardcode the rows to lighten the json
+            animData.push([i, anim.spriteRowInSheet]);
+            animData1.push([i, 1 * spSY]);
+            animData2.push([i, 2 * spSY]);
+            animData3.push([i, 3 * spSY]);
+            animData4.push([i, 4 * spSY]);
+            animData5.push([i, 5 * spSY]);
+            animData6.push([i, 6 * spSY]);
+            animData7.push([i, 7 * spSY]);
+        }
+
+        AddObjectAnimation(player.name, player.spriteSheets[anim.spriteSheetName], spSW, spSY, anim.name + "_down", animData);
+        AddObjectAnimation(player.name, player.spriteSheets[anim.spriteSheetName], spSW, spSY, anim.name + "_downleft", animData1);
+        AddObjectAnimation(player.name, player.spriteSheets[anim.spriteSheetName], spSW, spSY, anim.name + "_right", animData2);
+        AddObjectAnimation(player.name, player.spriteSheets[anim.spriteSheetName], spSW, spSY, anim.name + "_upright", animData3);
+        AddObjectAnimation(player.name, player.spriteSheets[anim.spriteSheetName], spSW, spSY, anim.name + "_up", animData4);
+        AddObjectAnimation(player.name, player.spriteSheets[anim.spriteSheetName], spSW, spSY, anim.name + "_upleft", animData5);
+        AddObjectAnimation(player.name, player.spriteSheets[anim.spriteSheetName], spSW, spSY, anim.name + "_left", animData6);
+        AddObjectAnimation(player.name, player.spriteSheets[anim.spriteSheetName], spSW, spSY, anim.name + "_downleft", animData7);
+    }
+
+    function getSpriteSizeInformations(img, imgWidth, imgHeight, spriteInSpriteWidth, spriteInSpriteHeight) {
+        if (spriteInSpriteWidth == undefined || spriteInSpriteWidth == 0)
+            spriteInSpriteWidth = 1;
+        if (spriteInSpriteHeight == undefined || spriteInSpriteHeight == 0)
+            spriteInSpriteHeight = 1;
+
+
+        //check sprite size per number of appearance in spritesheet
+        let canvasCheck = document.createElement('canvas');
+        canvasCheck.width = imgWidth;
+        canvasCheck.height = imgHeight;
+        var canvasCheck2D = canvasCheck.getContext('2d');
+        canvasCheck2D.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        let pxToCheck = 0;
+        let appearanceX = 0;
+        //we assume there is at least 10 transparent pixel between each sprite
+        let colorPixelTolerance = 5;
+
+        for (let x = 0; x < imgWidth; x++) {
+            var pixelData = canvasCheck2D.getImageData(x, x, 1, 1).data;
+            if (pixelData[3] != 0) {
+                if (colorPixelTolerance > 0) {
+                    colorPixelTolerance--;
+                    continue;
+                }
+                pxToCheck = x;
+                break;
+            }
+        }
+
+        let SpaceBetweenSpritesTolerance = 5;
+        let ColoredPixelBuffer = 0;
+        for (let x = 0; x < imgWidth; x++) {
+            var pixelData = canvasCheck2D.getImageData(x, pxToCheck, 1, 1).data;
+            if (pixelData[3] != 0 && ColoredPixelBuffer == 0) {
+                ColoredPixelBuffer = SpaceBetweenSpritesTolerance;
+                appearanceX++;
+            } else if (pixelData[3] == 0 && ColoredPixelBuffer > 0) {
+                ColoredPixelBuffer--;
+            }
+        }
+        if (spriteInSpriteWidth != undefined) {
+            appearanceX /= spriteInSpriteWidth;
+        }
+        let appearanceY = 0;
+        //we assume there is at least 10 transparent pixel between each sprite
+        ColoredPixelBuffer = 0;
+        for (let y = 0; y < imgHeight; y++) {
+            var pixelData = canvasCheck2D.getImageData(pxToCheck, y, 1, 1).data;
+            if (pixelData[3] != 0 && ColoredPixelBuffer == 0) {
+                ColoredPixelBuffer = SpaceBetweenSpritesTolerance;
+                appearanceY++;
+            } else if (pixelData[3] == 0 && ColoredPixelBuffer > 0) {
+                ColoredPixelBuffer--;
+            }
+        }
+        if (spriteInSpriteHeight != undefined) {
+            appearanceY /= spriteInSpriteHeight;
+        }
+        return [appearanceX, appearanceY];
     }
 
     // tutorial text into tiles
@@ -436,6 +576,166 @@ export default async function Game() {
         }
     }
 
+
+    async function postProcessingTiles() {
+        let previousWasSolo = [];
+        for (let x = 1; x < layerBG.length - 1; x++) {
+            for (let y = 1; y < layerBG[x].length - 1; y++) {
+                if (layerBG[x][y] < 10)
+                    continue;
+                let left = layerBG[x - 1][y];
+                let right = layerBG[x + 1][y];
+                let top = layerBG[x][y - 1];
+                let bottom = layerBG[x][y + 1];
+                left = (left < 10 && left > 0 || left == 24);
+                right = (right < 10 && right > 0 || right == 24);
+                top = (top < 10 && top > 0 || top == 24);
+                bottom = (bottom < 10 && bottom > 0 || bottom == 24);
+    
+    
+                //bottom linked
+                //top linked
+                //right linked
+                //left linked
+                if (left && right || top && bottom) {
+                    layerBG[x][y] = 24;
+                    continue;
+                }
+                if (left && top)
+                    previousWasSolo.push([x, y]);
+            }
+        }
+    
+        previousWasSolo.forEach(async (xy) => {
+            let x = xy[0];
+            let y = xy[1];
+            let left = layerBG[x - 1][y];
+            let right = layerBG[x + 1][y];
+            let top = layerBG[x][y - 1];
+            let bottom = layerBG[x][y + 1];
+            left = (left < 10 && left > 0 || left == 24);
+            right = (right < 10 && right > 0 || right == 24);
+            top = (top < 10 && top > 0 || top == 24);
+            bottom = (bottom < 10 && bottom > 0 || bottom == 24)
+    
+            //bottom linked
+            //top linked
+            //right linked
+            //left linked
+            if (left && right || top && bottom) {
+                layerBG[x][y] = 24;
+            }
+        })
+    
+        for (let x = 1; x < layerBG.length - 1; x++) {
+            for (let y = 1; y < layerBG[x].length - 1; y++) {
+                if (layerBG[x][y] < 10)
+                    continue;
+                let left = layerBG[x - 1][y];
+                let right = layerBG[x + 1][y];
+                let top = layerBG[x][y - 1];
+                let bottom = layerBG[x][y + 1];
+                let topLeft = (layerBG[x - 1][y - 1] == 0 || layerBG[x - 1][y - 1] >= 10);
+                let topRight = (layerBG[x + 1][y - 1] == 0 || layerBG[x + 1][y - 1] >= 10);
+                let bottomLeft = (layerBG[x - 1][y + 1] == 0 || layerBG[x - 1][y + 1] >= 10);
+                let bottomRight = (layerBG[x + 1][y + 1] == 0 || layerBG[x + 1][y + 1] >= 10);
+    
+                let linkleft = (left >= 10 && left != 24 || left == 0);
+                let linkright = (right >= 10 && right != 24 || right == 0);
+                let linktop = (top >= 10 && top != 24 || top == 0);
+                let linkbottom = (bottom >= 10 && bottom != 24 || bottom == 0);
+    
+    
+                //?  2 3 2
+                //?  3 3 3
+                //?  2 3 2
+                if (!topLeft && !bottomRight && !topRight && !bottomLeft &&
+                    left >= 10 && top >= 10 && right >= 10 && bottom >= 10) {
+                    layerBG[x][y] = 27;
+                    continue;
+                }
+    
+    
+                //?  2 3
+                //?  3 3 3
+                //?    3 2
+                if (!topLeft && !bottomRight &&
+                    left >= 10 && top >= 10 && right >= 10 && bottom >= 10) {
+                    layerBG[x][y] = 25;
+                    continue;
+                }
+    
+                if (!topRight && !bottomLeft &&
+                    left >= 10 && top >= 10 && right >= 10 && bottom >= 10) {
+                    layerBG[x][y] = 26;
+                    continue;
+                }
+    
+    
+    
+                //? 1 1 1
+                //? 3 3 3
+                //?   2 
+                //#region all implems of above case
+                //bottom not linked
+                if (linkleft && linkright && top == 0 && !linkbottom) {
+                    layerBG[x][y] = 14;
+                    continue;
+                }
+    
+                //top not linked
+                if (linkleft && linkright && bottom == 0 && !linktop) {
+                    layerBG[x][y] = 15;
+                    continue;
+                }
+    
+                //right not linked
+                if (left == 0 && linktop && linkbottom && !linkright) {
+                    layerBG[x][y] = 16;
+                    continue;
+                }
+    
+                //left not linked
+                if (right == 0 && linktop && linkbottom && !linkleft) {
+                    layerBG[x][y] = 17;
+                    continue;
+                }
+                //#endregion
+    
+    
+                //?   1 3
+                //?   3 3
+                //?       2
+                //#region all implems of above case
+                // if top and left are set and not top-left but bottom-right is
+                if (linktop && linkleft && !linkbottom && !linkright && topLeft && !bottomRight) {
+                    layerBG[x][y] = 23;
+                    continue;
+                }
+    
+                // if top and right are set and not top-right but bottom-left is then change case
+                if (linktop && linkright && !linkbottom && !linkleft && topRight && !bottomLeft) {
+                    layerBG[x][y] = 22;
+                    continue;
+                }
+    
+                // if left and bottom are set and not bottom-left but top-right is then change case
+                if (linkleft && linkbottom && !linkright && !linktop && bottomLeft && !topRight) {
+                    layerBG[x][y] = 21;
+                    continue;
+                }
+    
+                // if right and bottom are set and not bottom-right but top-left is then change case
+                if (linkright && linkbottom && !linkleft && !linktop && bottomRight && !topLeft) {
+                    layerBG[x][y] = 20;
+                    continue;
+                }
+                //#endregion
+    
+            }
+        }
+    }
+
     async function dynamicDrawMenu(arrOptions) {
         ctxui.clearRect(0, 0, canvasGame.width, canvasGame.height);
         ctxui.fillStyle = "rgba(100, 100, 100, .5)";
@@ -456,37 +756,17 @@ export default async function Game() {
         // names  + hp + level
         let texts = [];
 
-        let color = 'rgb(170, 170, 240)';
+        color = 'rgb(170, 170, 240)';
         ctxui.strokeStyle = "rgba(10,10,10, 1)";
         ctxui.lineWidth = .3;
         ctxui.globalAlpha = 1;
         ctxui.fillStyle = color;
         ctxui.font = "20px Arial";
 
-        if (arrOptions === menuOptions) {
+        if (arrOptions == menuOptions) {
             texts.push(`${player.name}  ${player.hp}/${player.maxHp} Lvl${player.level}`);
             for (let i = 0; i < team.allies.length; i++) {
-                texts.push(`${team.allies[i].name}  ${team.allies[i].hp}/${team.allies[i].maxHp} Lvl${team.allies[i].level}`);
-            }
-        } else if (arrOptions === player.skills && cursorOptions !== arrOptions.length) {
-            let skill = player.skills[cursorOptions][2];
-            let numbLines = Math.ceil(skill.effect.length / 48);
-            if (numbLines > 5)
-                ctxui.font = "15px Arial";
-
-            texts.push(`${skill.pp}/${skill.maxPP}   range: ${skill.range}    acc: ${skill.accuracy}%`);
-            let eff = skill.effect.split(" ")
-            let buffer = "";
-            for (let i = 0; i < eff.length; i++) {
-                if (buffer.length + eff[i].length >= 45) {
-                    texts.push(buffer);
-                    buffer = "";
-                }
-                buffer += eff[i];
-                if (i === eff.length - 1) {
-                    texts.push(buffer);
-                }
-                buffer += " "
+                texts.push(`${allies[i].name}  ${allies[i].hp}/${allies[i].maxHp} Lvl${allies[i].level}`);
             }
         }
         let maxH = canvasGame.height - 200;
@@ -497,7 +777,7 @@ export default async function Game() {
             ctxui.strokeText(txt, canvasGame.width / 8 + 20, maxH);
         })
         maxH += inc;
-        //gold also in bottom part
+        //gold
         ctxui.fillText(`money: ${player.gold}`, canvasGame.width / 8 + 20, maxH);
         ctxui.strokeText(`money: ${player.gold}`, canvasGame.width / 8 + 20, maxH);
 
@@ -533,6 +813,12 @@ export default async function Game() {
 
     async function dynamicDrawNotifs() {
         drawHeight += drop;
+        if (drawHeight >= maxH) {
+            drawHeight = startH + drop;
+            //get back to the canvas without the notifications
+            ctxui.clearRect(canvasGame.width / 8, canvasGame.height - 200, (canvasGame.width / 8) * 6, 150);
+            notifBoxDrawn = false;
+        }
         if (!notifBoxDrawn) {
             ctxui.fillStyle = "rgba(100, 100, 100, .5)";
             ctxui.fillRect(canvasGame.width / 8, canvasGame.height - 200, (canvasGame.width / 8) * 6, 150);
@@ -541,7 +827,7 @@ export default async function Game() {
             ctxui.strokeRect(canvasGame.width / 8, canvasGame.height - 200, (canvasGame.width / 8) * 6, 150);
             notifBoxDrawn = true;
         }
-        closeNotifCtdwn = 1;
+        closeNotifCtdwn = 3;
     }
 
     async function drawNotif(txt, color) {
@@ -557,6 +843,7 @@ export default async function Game() {
     }
 
     async function drawUI() {
+        ctxui.clearRect(0, 0, canvasGame.width, 40); // Clear the previous floor and level text and health bar
         let lifeBar = 150;
         ctxui.fillStyle = "rgba(230, 80, 0, 1)";
         ctxui.fillRect((canvasGame.width / 2 * 1.3), 5, lifeBar, 15);
@@ -567,60 +854,49 @@ export default async function Game() {
         ctxui.lineWidth = 2;
         ctxui.strokeRect((canvasGame.width / 2 * 1.3), 5, lifeBar, 15);
 
-
         let text = `${floornumber}F Lvl${player.level}          HP ${player.hp}/${player.maxHp}`
         ctxui.fillStyle = "rgba(250, 250, 250, 1)";
         ctxui.font = "bold 20px Arial";
         ctxui.fillText(text, 30, 20);
         ctxui.strokeStyle = "rgb(50,50,50)";
-        ctxui.lineWidth = 1;
-        ctxui.strokeText(text, 30, 20);
+        ctxui.lineWidth = 1.2;
+        ctxui.strokeText(text, 30, 19.5);
     }
 
-    async function animatedDrawMap() {
-        let step = 0;
-        let nFrame = 10;
-        //next is the number of frames in an action
+    async function animatedDrawMap(nFrame = 40, timeBetweenFrames = 10) {
         for (let next = nFrame; next >= 0; next--) {
-
+            // sourceY = player.spriteDirection[0] < 0 ? 32 * 3 : (player.spriteDirection[1] < 0 ? 32 : (player.spriteDirection[1] > 0 ? 32 * 2 : 0));
             let occurencecounter = [0, 0];
-
-            // check player direction and update the animation direction accordingly. next will be the frame at which we are.
             let animoccur = player.spriteDirection[0] < 0 ? [0, -next / nFrame] : (player.spriteDirection[1] < 0 ? [-next / nFrame, 0] : (player.spriteDirection[1] > 0 ? [next / nFrame, 0] : [0, next / nFrame]));
-
-
-
-            //temporary canvases
+    
             let buffer = document.createElement("canvas");
             buffer.width = canvasGame.width;
             buffer.height = canvasGame.height;
             let bufferCtx = buffer.getContext("2d");
+            bufferCtx.imageSmoothingEnabled = false;
             bufferCtx.willReadFrequently = true;
             let enemiesCopy = enemies;
-
+    
+            
             let vz = viewZoom / 2; // center view on player (half the tiles on the right, half on the left)
             let posXminus = player.posX - vz < 0 ? 0 : player.posX - vz; // get the start position in X for the map, if negative then out of world (set to 0)
             let posYminus = player.posY - vz < 0 ? 0 : player.posY - vz; // get the start position in Y for the map, if negative then out of world (set to 0)
             let posXmax = player.posX + vz + 1 > mPos ? mPos : player.posX + vz + 1; // get the max position in X for the map, if greater than the map size then set to map size
             let posYmax = player.posY + vz + 1 > mPos ? mPos : player.posY + vz + 1; // get the max position in Y for the map, if greater than the map size then set to map size
-
+    
             let sourceY = 0;
             let sourceX = 0;
-
+    
             // if min X is  0 (start of map) then apply offset to max X equal to lost number of tiles on the left side. This is to even out the loss and gain on both sides
-            if (posXminus === 0 && posXmax + vz - player.posX < mPos) {
+            if (posXminus == 0 && posXmax + vz - player.posX < mPos) {
                 posXmax += vz - player.posX;
             }
             // if min Y is 0 (start of map) then apply offset to max Y equal to lost number of tiles on the top side. This is to even out the loss and gain on both sides
-            if (posYminus === 0 && posYmax + vz - player.posY < mPos) { // layerBG[posXmax].length 
+            if (posYminus == 0 && posYmax + vz - player.posY < mPos) { // layerBG[posXmax].length 
                 posYmax += vz - player.posY;
             }
-
-            let canvaswidth = Math.floor(ctx.canvas.width / viewZoom) + 1; // +1 to avoid erasing last line if room is max sizeof map and avoid having no wall after the room
-            let canvasheight = Math.floor(ctx.canvas.height / viewZoom) + 1; // same as above but for height
-
             let imgD = undefined;
-
+    
             // TODO : a smaaaall bit of sprite is wrong, to fix.
             // ? INFO : this part is responsible to draw the left or top part of the map when moving right or down. it fixes a graphic bug
             // ?        For example a down movement: the top tile is gonna disappear bit by bit drawn on top by the one under that goes up.
@@ -632,135 +908,154 @@ export default async function Game() {
             } else if (animoccur[1] > 0) {
                 imgD = ctx.getImageData(0, canvasheight * 1 / nFrame, ctx.canvas.width, canvasheight * nFrame / next);
             }
-
-
-
+    
+    
+    
             // ? INFO : Clear Not needed because no drop of performance or ram usage difference were found between overdraw and clear then draw when tested.
             // // Clear the entire canvas
             // ctx.clearRect(0, 0, canvasGame.width, canvasGame.height);
+
+            ctxitem.clearRect(0, 0, canvasGame.width, canvasGame.height);
+
             if (imgD !== undefined) {
                 ctx.putImageData(imgD, 0, 0);
             }
-
-            // Clear the entire character canvas
-            ctxchar.clearRect(0, 0, canvasGame.width, canvasGame.height);
-
+    
+            // Clear the entire canvas
+            // ctxchar.clearRect(0, 0, canvasGame.width, canvasGame.height);
             for (let i = posXminus; i < posXmax; i++) {
                 for (let j = posYminus; j < posYmax; j++) {
-
-                    //choose the sprite to draw based on the value in the layerBG array
+    
+                    let bgTileSize = 24;
                     switch (layerBG[i][j]) {
                         case 2:
-                            sourceY = 32;
-                            sourceX = 32;
+                            // floor Tile
+                            sourceY = bgTileSize;
+                            sourceX = bgTileSize;
                             break;
                         case 3:
-                            sourceY = 32;
-                            sourceX = 32;
+                            // floor Tile
+                            sourceY = bgTileSize;
+                            sourceX = bgTileSize;
                             break;
                         case 10:
+                            // bottom right not linked
                             sourceY = 0;
                             sourceX = 0;
                             break;
                         case 11:
+                            // bottom left not linked
                             sourceY = 0;
-                            sourceX = 32 * 2;
+                            sourceX = bgTileSize * 2;
                             break;
                         case 12:
-                            sourceY = 32 * 2;
+                            // top right not linked
+                            sourceY = bgTileSize * 2;
                             sourceX = 0;
                             break;
                         case 13:
-                            sourceY = 32 * 2;
-                            sourceX = 32 * 2;
+                            // top left not linked
+                            sourceY = bgTileSize * 2;
+                            sourceX = bgTileSize * 2;
                             break;
                         case 14:
+                            // bottom not linked
                             sourceY = 0;
-                            sourceX = 32;
+                            sourceX = bgTileSize;
                             break;
                         case 15:
-                            sourceY = 32 * 2;
-                            sourceX = 32;
+                            // left not linked
+                            sourceY = bgTileSize * 2;
+                            sourceX = bgTileSize;
                             break;
                         case 16:
-                            sourceY = 32;
+                            // right not linked
+                            sourceY = bgTileSize;
                             sourceX = 0;
                             break;
                         case 17:
-                            sourceY = 32;
-                            sourceX = 32 * 2;
+                            // top not linked
+                            sourceY = bgTileSize;
+                            sourceX = bgTileSize * 2;
+                            break;
+                        case 20:
+                            sourceY = bgTileSize * 3;
+                            sourceX = bgTileSize * 3;
+                            break;
+                        case 21:
+                            sourceY = bgTileSize * 3;
+                            sourceX = bgTileSize * 4;
+                            break;
+                        case 22:
+                            sourceY = bgTileSize * 4;
+                            sourceX = bgTileSize * 3;
+                            break;
+                        case 23:
+                            sourceY = bgTileSize * 4;
+                            sourceX = bgTileSize * 4;
+                            break;
+                        case 24:
+                            //all
+                            sourceY = bgTileSize;
+                            sourceX = bgTileSize * 3;
+                            break;
+                        case 25:
+                            //topleft bottomright walkable
+                            sourceY = 0;
+                            sourceX = bgTileSize * 3;
+                            break;
+                        case 26:
+                            //topright bottomleft walkable
+                            sourceY = 0;
+                            sourceX = bgTileSize * 4;
+                            break;
+                        case 27:
+                            //all corners
+                            sourceY = bgTileSize;
+                            sourceX = bgTileSize * 4;
                             break;
                         default:
-                            sourceY = 32 * 2;
-                            sourceX = 32 * 4;
+                            sourceY = bgTileSize * 2;
+                            sourceX = bgTileSize * 3;
                             break;
                     }
-
                     //draw the background
-                    ctx.drawImage(tileAtlas, sourceX, sourceY, tileSizeMap, tileSizeMap, (animoccur[0] + occurencecounter[0]) * canvaswidth, (animoccur[1] + occurencecounter[1]) * canvasheight, canvaswidth, canvasheight);
-
+                    ctx.drawImage(tileAtlas, sourceX, sourceY, bgTileSize, bgTileSize, Math.ceil((animoccur[0] + occurencecounter[0]) * canvaswidth), Math.ceil((animoccur[1] + occurencecounter[1]) * canvasheight), canvaswidth, canvasheight);
+    
                     if (layerItems[i][j] !== undefined) {
                         let item = layerItems[i][j];
-                        // the  + 0.04 is to add a slight offset to the item position to avoid overlapping on other tiles
-                        ctxchar.drawImage(item.spriteSheet, item.SSposX, item.SSposY, item.SSsize, item.SSsize, (animoccur[0] + occurencecounter[0] + 0.04 * i / posXmax) * canvaswidth, (animoccur[1] + occurencecounter[1] + 0.04 * j / posYmax) * canvasheight, canvaswidth, canvasheight);
+                        ctxitem.drawImage(item.spriteSheet, item.SSposX, item.SSposY, item.SSsize, item.SSsize, (animoccur[0] + occurencecounter[0] + 0.20 * i / posXmax) * canvaswidth, (animoccur[1] + occurencecounter[1] + 0.20 * j / posYmax) * canvasheight, canvaswidth, canvasheight);
                     }
-                    if (layerCharacters[i][j] !== undefined) {
-                        if (layerCharacters[i][j] === 1) {
-                            let spriteSize = 233;
-                            sourceY = player.spriteDirection[0] < 0 ? spriteSize * 3 : (player.spriteDirection[1] < 0 ? spriteSize : (player.spriteDirection[1] > 0 ? spriteSize * 2 : 0));
-                            if (next % 3 === 0 && next !== 0)
-                                step = next / 3;
-                            if (step > 2)
-                                step = 0;
-                            sourceX = step * spriteSize;
-
-                            //draw small green circle of low opacity on the tile
-                            //add the circle without interior but with border
-                            ctxchar.fillStyle = "rgba(0, 0, 0, 0)";
-                            ctxchar.beginPath();
-                            //add stroke circle
-                            ctxchar.arc((occurencecounter[0] + 0.02) * canvaswidth + canvaswidth / 2, (occurencecounter[1] + 0.5) * canvasheight + canvasheight / 4, canvaswidth / 4.5, 0, 2 * Math.PI);
-                            ctxchar.lineWidth = 2;
-                            ctxchar.strokeStyle = "rgba(0, 255, 0, 0.5)";
-                            ctxchar.stroke();
-                            ctxchar.fill();
-                            ctxchar.closePath();
-                            ctxchar.drawImage(player.spriteSheet, sourceX, sourceY, spriteSize, spriteSize, occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
-
-                            if (player.gotHit) {
-                                const imageData = ctxchar.getImageData(occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
-                                const data = imageData.data;
-                                for (let i = 0; i < data.length; i += 4) {
-                                    data[i] = 255;
-                                }
-                                ctxchar.putImageData(imageData, occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight);
-                                player.gotHit = false;
-                            }
-
-
+                    if (layerCharacters[i][j] != undefined) {
+                        if (layerCharacters[i][j] == 1) {
+                            UpdateObjectPosition(player.name, occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight);
+                            SetObjectAnimation(player.name, player.spriteDirection[0] < 0 ? 'walk_up' : (player.spriteDirection[1] < 0 ? 'walk_left' : (player.spriteDirection[1] > 0 ? 'walk_right' : 'walk_down')));
+                            SetBeforeDrawArgs(player.name, (occurencecounter[0] + 0.02) * canvaswidth + canvaswidth / 2, (occurencecounter[1] + 0.5) * canvasheight + canvasheight / 4, canvaswidth / 4.5)
+    
                         } else {
+                            let enemySpriteSize = 32;
                             //get enemy from enemies by id
                             let enemy = layerCharacters[i][j];
-                            sourceY = enemy.dir === 0 ? 0 : (enemy.dir === 1 ? 32 : (enemy.dir === 2 ? 32 * 2 : 32 * 3));
+                            sourceY = enemy.dir == 0 ? 0 : (enemy.dir == 1 ? enemySpriteSize : (enemy.dir == 2 ? enemySpriteSize * 2 : enemySpriteSize * 3));
                             sourceX = 0; //!TEMP for animations change to continuous
                             enemy.dir = 0;
-
-
+    
+    
                             ctxchar.fillStyle = "rgba(0, 0, 0, 0)";
                             ctxchar.beginPath();
                             //add stroke circle
-                            ctxchar.arc((occurencecounter[0] + 0.02) * canvaswidth + canvaswidth / 2, (occurencecounter[1] + 0.5) * canvasheight + canvasheight / 4, canvaswidth / 4.5, 0, 2 * Math.PI);
+                            ctxchar.arc(((animoccur[0] + occurencecounter[0]) + 0.02) * canvaswidth + canvaswidth / 2, (animoccur[1] + occurencecounter[1] + 0.5) * canvasheight + canvasheight / 4, canvaswidth / 4.5, 0, 2 * Math.PI);
                             ctxchar.lineWidth = 2;
                             ctxchar.strokeStyle = "rgba(255, 0, 0, 0.5)";
                             ctxchar.stroke();
                             ctxchar.fill();
                             ctxchar.closePath();
-
-                            ctxchar.drawImage(enemy.enemySpriteSheet, sourceX, sourceY, tileSizeMap, tileSizeMap, occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
+    
+                            ctxchar.drawImage(enemy.enemySpriteSheet, sourceX, sourceY, enemySpriteSize, enemySpriteSize, (animoccur[0] + occurencecounter[0]) * canvaswidth, (animoccur[1] + occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
                             let gotHit = false;
-                            //I REALLY NEED LAYER CHARA TO POINT TO ENEMY, THE FOLLOWING CODE IS BLERGH INEFFICIENT
+                            // TODO: I REALLY NEED LAYER CHARA TO POINT TO ENEMY, THE FOLLOWING CODE IS BLERGH INEFFICIENT
                             for (let z = 0; z < enemiesCopy.length; z++) {
-                                if (enemiesCopy[z].posX === i && enemiesCopy[z].posY === j) {
+                                if (enemiesCopy[z].posX == i && enemiesCopy[z].posY == j) {
                                     gotHit = enemiesCopy[z].gotHit;
                                     enemiesCopy[z].gotHit = false;
                                     // enemiesCopy.splice(z, 1);
@@ -768,28 +1063,32 @@ export default async function Game() {
                                 }
                             }
                             if (gotHit) {
-                                const imageData = ctxchar.getImageData(occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
-
+                                const imageData = ctxchar.getImageData((animoccur[0] + occurencecounter[0]) * canvaswidth, (animoccur[1] + occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
+    
                                 const data = imageData.data;
                                 for (let i = 0; i < data.length; i += 4) {
                                     data[i] = 255;
                                 }
-                                ctxchar.putImageData(imageData, occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight);
+                                ctxchar.putImageData(imageData, (animoccur[0] + occurencecounter[0]) * canvaswidth, (animoccur[1] + occurencecounter[1] - 0.1) * canvasheight);
                                 enemy.gotHit = false;
                             }
                         }
                     }
-
+                    // else if (layerItems[i][j] != undefined) {
+                    //     let item = layerItems[i][j];
+                    //     bufferCtx.drawImage(item.spriteSheet, 0, 0, 16, 16,(animoccur[0] + occurencecounter[0])* canvaswidth,(animoccur[1] + occurencecounter[1])* canvasheight, canvaswidth, canvasheight);
+                    // }
+    
                     for (let xAdd = posXmax - posXminus; xAdd < parseInt(canvasGame.style.width) / 32; xAdd++) {
                         bufferCtx.drawImage(tileAtlas, 32 * 4, 32 * 2, tileSizeMap, tileSizeMap, xAdd * canvaswidth, (animoccur[1] + occurencecounter[1]) * canvasheight, canvaswidth, canvasheight);
                     }
-
+    
                     occurencecounter[1]++;
                 }
-
+    
                 for (let yAdd = posYmax - posYminus; yAdd < parseInt(canvasGame.style.height) / 32; yAdd++) {
                     ctx.drawImage(tileAtlas, 32 * 4, 32 * 2, tileSizeMap, tileSizeMap, (animoccur[0] + occurencecounter[0]) * canvaswidth, yAdd * canvasheight, canvaswidth, canvasheight);
-
+    
                     for (let xAdd = posXmax - posXminus; xAdd < parseInt(canvasGame.style.width) / 32; xAdd++) {
                         ctx.drawImage(tileAtlas, 32 * 4, 32 * 2, tileSizeMap, tileSizeMap, xAdd * canvaswidth, yAdd * canvasheight, canvaswidth, canvasheight);
                     }
@@ -802,185 +1101,33 @@ export default async function Game() {
                 occurencecounter[0]++;
             }
             ctx.drawImage(buffer, 0, 0);
-
+    
             drawUI();
-            await new Promise(r => setTimeout(r, 25));
+            await new Promise(r => setTimeout(r, timeBetweenFrames));
         }
+        if (letgo)
+            SetObjectAnimation(player.name, player.spriteDirection[0] < 0 ? 'idle_up' : (player.spriteDirection[1] < 0 ? 'idle_left' : (player.spriteDirection[1] > 0 ? 'idle_right' : 'idle_down')));
         player.spriteDirection = [0, 0];
-
         action_in_progress = false;
     }
-
-    async function drawMap() {
-        // sourceY = player.spriteDirection[0] < 0 ? 32 * 3 : (player.spriteDirection[1] < 0 ? 32 : (player.spriteDirection[1] > 0 ? 32 * 2 : 0));
-        let occurencecounter = [0, 0];
-
-        let buffer = document.createElement("canvas");
-        buffer.width = canvasGame.width;
-        buffer.height = canvasGame.height;
-        let bufferCtx = buffer.getContext("2d");
-        bufferCtx.imageSmoothingEnabled = false;
-        bufferCtx.willReadFrequently = true;
-        let enemiesCopy = enemies;
-
-
-        // Clear the entire canvas
-        ctx.clearRect(0, 0, canvasGame.width, canvasGame.height);
-        // Clear the entire canvas
-        ctxchar.clearRect(0, 0, canvasGame.width, canvasGame.height);
-
-        let vz = viewZoom / 2; //number of tiles on each side of the player
-        let posXminus = player.posX - vz < 0 ? 0 : player.posX - vz;
-        let posYminus = player.posY - vz < 0 ? 0 : player.posY - vz;
-        let posXmax = player.posX + vz + 1 > mPos ? mPos : player.posX + vz + 1;
-        let posYmax = player.posY + vz + 1 > mPos ? mPos : player.posY + vz + 1; //layerBG[posXmax].length = mPos
-
-        let sourceY = 0;
-        let sourceX = 0;
-
-        if (posXminus === 0 && posXmax + vz - player.posX < mPos) {
-            posXmax += vz - player.posX;
-        }
-        if (posYminus === 0 && posYmax + vz - player.posY < mPos) { // layerBG[posXmax].length 
-            posYmax += vz - player.posY;
-        }
-        let canvaswidth = Math.floor(ctx.canvas.width / viewZoom) + 1; //+1 to avoid erasing last line if room is max sizeof map
-        let canvasheight = Math.floor(ctx.canvas.height / viewZoom) + 1;
-
-        for (let i = posXminus; i < posXmax; i++) {
-            for (let j = posYminus; j < posYmax; j++) {
-                switch (layerBG[i][j]) {
-                    case 2:
-                        sourceY = 32;
-                        sourceX = 32;
-                        break;
-                    case 3:
-                        sourceY = 32;
-                        sourceX = 32;
-                        break;
-                    case 10:
-                        sourceY = 0;
-                        sourceX = 0;
-                        break;
-                    case 11:
-                        sourceY = 0;
-                        sourceX = 32 * 2;
-                        break;
-                    case 12:
-                        sourceY = 32 * 2;
-                        sourceX = 0;
-                        break;
-                    case 13:
-                        sourceY = 32 * 2;
-                        sourceX = 32 * 2;
-                        break;
-                    case 14:
-                        sourceY = 0;
-                        sourceX = 32;
-                        break;
-                    case 15:
-                        sourceY = 32 * 2;
-                        sourceX = 32;
-                        break;
-                    case 16:
-                        sourceY = 32;
-                        sourceX = 0;
-                        break;
-                    case 17:
-                        sourceY = 32;
-                        sourceX = 32 * 2;
-                        break;
-                    default:
-                        sourceY = 32 * 2;
-                        sourceX = 32 * 4;
-                        break;
-                }
-
-                //draw the background
-                ctx.drawImage(tileAtlas, sourceX, sourceY, tileSizeMap, tileSizeMap, occurencecounter[0] * canvaswidth, occurencecounter[1] * canvasheight, canvaswidth, canvasheight);
-                if (layerItems[i][j] !== undefined) {
-                    let item = layerItems[i][j];
-                    ctxchar.drawImage(item.spriteSheet, item.SSposX, item.SSposY, item.SSsize, item.SSsize, (occurencecounter[0] + 0.04) * canvaswidth, (occurencecounter[1] + 0.04) * canvasheight, canvaswidth, canvasheight);
-                }
-                if (layerCharacters[i][j] !== undefined) {
-                    if (layerCharacters[i][j] === 1) {
-                        sourceY = player.spriteDirection[0] < 0 ? 32 * 3 : (player.spriteDirection[1] < 0 ? 32 : (player.spriteDirection[1] > 0 ? 32 * 2 : 0));
-                        sourceX = 0
-
-                        //draw small green circle of low opacity on the tile
-                        //add the circle without interior but with border
-                        ctxchar.fillStyle = "rgba(0, 0, 0, 0)";
-                        ctxchar.beginPath();
-                        //add stroke circle
-                        ctxchar.arc((occurencecounter[0] + 0.02) * canvaswidth + canvaswidth / 2, (occurencecounter[1] + 0.5) * canvasheight + canvasheight / 4, canvaswidth / 4.5, 0, 2 * Math.PI);
-                        ctxchar.lineWidth = 2;
-                        ctxchar.strokeStyle = "rgba(0, 255, 0, 0.5)";
-                        ctxchar.stroke();
-                        ctxchar.fill();
-                        ctxchar.closePath();
-                        ctxchar.drawImage(player.spriteSheet, sourceX, sourceY, tileSizeMap, tileSizeMap, occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
-
-                        if (player.gotHit) {
-                            const imageData = ctxchar.getImageData(occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight, canvaswidth, canvasheight);
-                            const data = imageData.data;
-                            for (let i = 0; i < data.length; i += 4) {
-                                data[i] = 255;
-                            }
-                            ctxchar.putImageData(imageData, occurencecounter[0] * canvaswidth, (occurencecounter[1] - 0.1) * canvasheight);
-                            player.gotHit = false;
-                        }
-                    }
-                }
-                // else if (layerItems[i][j] !== undefined) {
-                //     let item = layerItems[i][j];
-                //     bufferCtx.drawImage(item.spriteSheet, 0, 0, 16, 16, occurencecounter[0]* canvaswidth,occurencecounter[1]* canvasheight, canvaswidth, canvasheight);
-                // }
-
-                for (let xAdd = posXmax - posXminus; xAdd < parseInt(canvasGame.style.width) / 32; xAdd++) {
-                    bufferCtx.drawImage(tileAtlas, 32 * 4, 32 * 2, tileSizeMap, tileSizeMap, xAdd * canvaswidth, occurencecounter[1] * canvasheight, canvaswidth, canvasheight);
-                }
-
-                occurencecounter[1]++;
-            }
-
-            for (let yAdd = posYmax - posYminus; yAdd < parseInt(canvasGame.style.height) / 32; yAdd++) {
-                ctx.drawImage(tileAtlas, 32 * 4, 32 * 2, tileSizeMap, tileSizeMap, occurencecounter[0] * canvaswidth, yAdd * canvasheight, canvaswidth, canvasheight);
-
-                for (let xAdd = posXmax - posXminus; xAdd < parseInt(canvasGame.style.width) / 32; xAdd++) {
-                    ctx.drawImage(tileAtlas, 32 * 4, 32 * 2, tileSizeMap, tileSizeMap, xAdd * canvaswidth, yAdd * canvasheight, canvaswidth, canvasheight);
-                }
-            }
-            // because it's stylish
-            if (document.getElementById("stylish").checked) {
-                await new Promise(r => setTimeout(r, document.getElementById("myRange").value));
-            }
-            occurencecounter[1] = 0;
-            occurencecounter[0]++;
-        }
-        ctx.drawImage(buffer, 0, 0);
-
-        drawUI();
-
-        player.spriteDirection = [0, 0];
-
-
-    }
-
-    function spawn(avoid, player) {
+    
+    function spawn(avoid) {
         //get the number of rooms
         let roomNumber = usedPosBounds.length;
         //get a random room
         let room = Math.floor(Math.random() * roomNumber);
-        if (avoid !== undefined && room === avoid) {
-            if (room === 0) {
+        if (avoid != undefined && room == avoid) {
+            if (room == 0) {
                 room++;
             } else {
                 room--;
             }
-        };
+        }
+        //get a point in the room
         let pos = getPointInRoom(room);
         return [pos[0], pos[1], room];
     }
+    
 
     //TODO: getPoinInRoom is called by spawn() and an edge case exist where the point is moved to avoid actual existing sprite but then brought back to this point by this function
     function getPointInRoom(room) {
@@ -1048,6 +1195,7 @@ export default async function Game() {
 
         drawRooms();
         drawCorridors();
+        postProcessingTiles();
 
         //assign uint8array to layerCharacters and layerItems
         for (let i = 0; i < mPos; i++) {
@@ -1065,7 +1213,6 @@ export default async function Game() {
         layerItems[player.posX][player.posY + 1] = arrowdown
         layerItems[player.posX - 1][player.posY] = arrowleft
         layerItems[player.posX + 1][player.posY] = arrowright
-
         //spawn exit
         for (let i = 0; i < projects.length; i++) {
             let exS = spawn(pS[2]);
@@ -1075,23 +1222,28 @@ export default async function Game() {
             // toavoid.push(exS[2]);
         }
 
-        animatedDrawMap();
+        animatedDrawMap(2, 0);
         audio = new Audio('gameSound/magicSchool.ogg');
         audio.play();
         audio.loop = true;
     }
 
+    ctx.drawImage(new Image("image/logo.png"), 0, 0, ctx.width, ctx.height);
+    characterLoader(selectedChar);
+    setTimeout(function () {
+        initGame();
+    }, 500);
+
     function update(moved) {
         // let newProjectiles = updateEnemies();
         // if (newProjectiles !== undefined)
         //     projectiles = projectiles.concat(newProjectiles);
-        updatePlayer();
         // updateProjectiles();
         updateCollision();
         if (moved && !fastInput) {
             animatedDrawMap();
         } else {
-            drawMap();
+            animatedDrawMap(1, 0);
         }
         closeNotifCtdwn--;
         if (closeNotifCtdwn < 0) {
@@ -1127,8 +1279,6 @@ export default async function Game() {
             }
         }
     }
-
-    function updatePlayer() { }
 
     function enableNextFloor() {
         nFloor = true;
@@ -1193,7 +1343,7 @@ export default async function Game() {
     function restart() {
         floornumber = 0;
         player.skills = [];
-        characterLoader("Kraig"); //! hardcoded temp
+        characterLoader(selectedChar);
         closeNotifCtdwn = 0;
         //get back to the canvas without the notifications
         ctxui.clearRect(0, 0, canvasGame.height, canvasGame.width);
@@ -1277,7 +1427,6 @@ export default async function Game() {
         if (action_in_progress) {
             return;
         }
-
         pressedkeys.forEach(element => {
             var name = element.toLowerCase();
             if (player.hp <= 0 || stopInputs) {
@@ -1294,11 +1443,8 @@ export default async function Game() {
                 case "z":
                 case "w":
                 case "arrowup":
-                    console.log(rooms);
-                    console.log(layerBG);
-                    console.log(layerCharacters);
-                    console.log(layerItems);
                     if (UIMODE === 0) {
+                        letgo = false;
                         player.spriteDirection[0] = -1;
                         movePlayer(0, -1);
                     } else {
@@ -1309,6 +1455,7 @@ export default async function Game() {
                 case "a":
                 case "arrowleft":
                     if (UIMODE === 0) {
+                        letgo = false;
                         player.spriteDirection[1] = -1;
                         movePlayer(-1, 0);
                     }
@@ -1316,6 +1463,7 @@ export default async function Game() {
                 case "s":
                 case "arrowdown":
                     if (UIMODE === 0) {
+                        letgo = false;
                         player.spriteDirection[0] = 1;
                         movePlayer(0, 1);
                     } else {
@@ -1325,6 +1473,7 @@ export default async function Game() {
                 case "d":
                 case "arrowright":
                     if (UIMODE === 0) {
+                        letgo = false;
                         player.spriteDirection[1] = 1;
                         movePlayer(1, 0);
                     } else {
@@ -1342,35 +1491,179 @@ export default async function Game() {
                         interfaceUI(true);
                     }
                     break;
-                case "e":
-                    if (nFloor) {
-                        nextFloor();
-                    } else {
-                        pickUp();
-                    }
-                    break;
             }
         });
     });
 
-    //onload
-    characterLoader("Kraig");
-    //show image image/maps/line.png in the canvas
-    let loading_img = new Image();
-    loading_img.src = "image/logo.png";
-    loading_img.onload = function () {
-        ctx.drawImage(loading_img, 0, 0, canvasGame.width, canvasGame.height);
-    };
-
     document.addEventListener('keyup', function (event) {
+        let keys = ["z", "q", "s", "d", "w", "a", "arrowup", "arrowright", "arrowleft", "arrowdown"];
         pressedkeys.splice(pressedkeys.indexOf(event.key), 1);
         if (event.key === "Shift") {
             fastInput = false;
         }
+        if (keys.includes(event.key))
+            letgo = true;
+        if (event.key ==="e"){
+            if (nFloor) {
+                nextFloor();
+            } else {
+                pickUp();
+            }
+        }
     });
 
-    //wait 1s
-    setTimeout(function () {
-        initGame();
-    }, 1000);
+
+
+
+
+
+
+
+
+    //animation
+
+    function DrawCirclePlayer(arg1, arg2, arg3) {
+
+        ctxchar.clearRect(arg1 - arg3 - 2, arg2 - arg3 - 2, arg3 * 2 + 4, arg3 * 2 + 4);
+        ctxchar.fillStyle = "rgba(0, 0, 0, 0)";
+        ctxchar.beginPath();
+        //add stroke circle
+        ctxchar.arc(arg1, arg2, arg3, 0, 2 * Math.PI);
+        ctxchar.lineWidth = 2;
+        ctxchar.strokeStyle = "rgba(0, 255, 0, 0.5)";
+        ctxchar.stroke();
+        ctxchar.fill();
+        ctxchar.closePath();
+    }
+
+    function RemoveObjectAnimator(obj) {
+        if (animationQueue[obj])
+            animationQueue.remove(obj);
+    }
+
+    function AddObjectAnimator(obj) {
+        if (!animationQueue[obj]) {
+            animationQueue[obj] = {
+                currentFrame: 0,
+                currentAnimation: null,
+                beforeDrawCallback: null,
+                previousFrameSize: [],
+                beforeDrawArgs: [],
+                biggestPX: biggestSize,
+                x: 0,
+                y: 0,
+                animations: {},
+                spriteSheet: {}
+            };
+        }
+    }
+
+    function AddObjectAnimation(obj, spritesheet, spriteWidth, spriteHeight, animationName, animation_data) {
+        if (animationQueue[obj]) {
+            animationQueue[obj].animations[animationName] = animation_data;
+            animationQueue[obj].spriteSheet[animationName] = [spritesheet, spriteWidth, spriteHeight];
+        } else {
+            console.error(`Object "${obj}" not found in animation queue.`);
+        }
+    }
+
+    function SetObjectAnimation(obj, animationName) {
+        if (animationQueue[obj] && animationQueue[obj].animations[animationName]) {
+            if (animationQueue[obj].currentAnimation == animationName)
+                return;
+            animationQueue[obj].currentAnimation = animationName;
+            animationQueue[obj].currentFrame = 0;
+        } else {
+            console.error(`Animation "${animationName}" not found for object "${obj}".`);
+        }
+    }
+
+    function SetBeforeDrawCallback(obj, callback) {
+        if (animationQueue[obj]) {
+            animationQueue[obj].beforeDrawCallback = [callback];
+        } else {
+            console.error(`Object "${obj}" not found in animation queue.`);
+        }
+    }
+
+    function SetBeforeDrawArgs(obj, ...args) {
+        if (animationQueue[obj]) {
+            animationQueue[obj].beforeDrawArgs = args;
+        } else {
+            console.error(`Object "${obj}" not found in animation queue.`);
+        }
+    }
+
+    function UpdateObjectPosition(obj, x, y) {
+        if (animationQueue[obj]) {
+            animationQueue[obj].x = x;
+            animationQueue[obj].y = y;
+        } else {
+            console.error(`Object "${obj}" not found in animation queue.`);
+        }
+    }
+
+    function UpdateObjectbiggestPX(obj, size) {
+        if (animationQueue[obj]) {
+            animationQueue[obj].biggestPX = size;
+        } else {
+            console.error(`Object "${obj}" not found in animation queue.`);
+        }
+    }
+
+    function UpdateObjectbiggestSize(obj, size) {
+        if (animationQueue[obj]) {
+            animationQueue[obj].biggestSize = size;
+        } else {
+            console.error(`Object "${obj}" not found in animation queue.`);
+        }
+    }
+
+    function updateAnimations() {
+        for (let obj in animationQueue) {
+            let objData = animationQueue[obj];
+            if (objData.currentAnimation != undefined) {
+                let currentFrame = objData.currentFrame++;
+                let animation = objData.animations[objData.currentAnimation];
+                if (animation.length <= currentFrame) {
+                    objData.currentFrame = 0;
+                    currentFrame = 0;
+                }
+                let frameData = animation[currentFrame];
+                if (objData.beforeDrawCallback != null)
+                    objData.beforeDrawCallback[0](...objData.beforeDrawArgs);
+                let spriteSheetInfos = objData.spriteSheet[objData.currentAnimation];
+                let biggestPX = objData.biggestPX;
+
+                let zoomPX = biggestSize / (biggestSize - biggestSize * biggestPX);
+
+                let paddingx = objData.x + canvaswidth / 2 - (spriteSheetInfos[1] / 2) * zoomPX;
+
+                let paddingy = objData.y + canvasheight - (spriteSheetInfos[2] * zoomPX * 0.75);
+                let pixelW = spriteSheetInfos[1] * zoomPX;
+                let pixelH = spriteSheetInfos[2] * zoomPX;
+
+                let prevF = objData.previousFrameSize;
+                if (prevF.length != 0)
+                    ctxchar.clearRect(prevF[0] - 1, prevF[1] - 1, prevF[2] + 1, prevF[3] + 1);
+                objData.previousFrameSize = [paddingx,
+                    paddingy,
+                    pixelW,
+                    pixelH]
+                ctxchar.drawImage(spriteSheetInfos[0],
+                    frameData[0],
+                    frameData[1],
+                    spriteSheetInfos[1],
+                    spriteSheetInfos[2],
+                    paddingx,
+                    paddingy,
+                    pixelW,
+                    pixelH
+                );
+            }
+        }
+    }
+
+    //call UpdateAnimations once every 1s
+    setInterval(updateAnimations, 250);
 }

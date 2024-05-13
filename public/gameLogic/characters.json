@@ -1,17 +1,97 @@
 {
-    "Kraig": {
-        "name": "Kraig",
-        "hp": 100,
-        "maxHp": 100,
-        "skills": ["Fireball", "MegaBall"],
-        "defense": 1,
-        "attackPower": 1,
+    "Bulbasaur": {
+        "name": "Bulbasaur",
+        "sizeMultiplier": 0.55,
+        "hp": 45,
+        "maxHp": 45,
+        "defense": 49,
+        "attackPower": 49,
         "level": 1,
         "xp": 0,
         "xpToNextLevel": 100,
         "xpMultiplier": 1.6,
         "gold": 0,
         "inventory": [],
-        "spriteSheet": "image/maps/spritesheet.png"
+        "presentationSprite": "image/maps/Characters/Faces/",
+        "animations": [
+            {
+                "name": "idle",
+                "spriteSheetName": "Idle",
+                "spriteSheetPath": "image/maps/Characters/Animations/Idle/Bulbasaur_Idle-Anim.png",
+                "spriteRowInSheet": 0
+            },
+            {
+                "name": "walk",
+                "spriteSheetName": "Walk",
+                "spriteSheetPath": "image/maps/Characters/Animations/Walk/Bulbasaur_Walk-Anim.png",
+                "spriteRowInSheet": 0
+            }
+        ],
+        "evos": [
+            "Ivysaur"
+        ]
+    },
+    "Ivysaur": {
+        "name": "Ivysaur",
+        "sizeMultiplier": 0.6,
+        "hp": 60,
+        "maxHp": 60,
+        "defense": 63,
+        "attackPower": 62,
+        "level": 1,
+        "xp": 0,
+        "xpToNextLevel": 100,
+        "xpMultiplier": 1.6,
+        "gold": 0,
+        "inventory": [],
+        "presentationSprite": "image/maps/Characters/Faces/",
+        "animations": [
+            {
+                "name": "idle",
+                "spriteSheetName": "Idle",
+                "spriteSheetPath": "image/maps/Characters/Animations/Idle/Ivysaur_Idle-Anim.png",
+                "spriteRowInSheet": 0
+            },
+            {
+                "name": "walk",
+                "spriteSheetName": "Walk",
+                "spriteSheetPath": "image/maps/Characters/Animations/Walk/Ivysaur_Walk-Anim.png",
+                "spriteRowInSheet": 0
+            }
+        ],
+        "evos": [
+            "Venusaur"
+        ],
+        "prevo": "Bulbasaur"
+    },
+    "Venusaur": {
+        "name": "Venusaur",
+        "sizeMultiplier": 0.7,
+        "hp": 80,
+        "maxHp": 80,
+        "defense": 83,
+        "attackPower": 82,
+        "level": 1,
+        "xp": 0,
+        "xpToNextLevel": 100,
+        "xpMultiplier": 1.6,
+        "gold": 0,
+        "inventory": [],
+        "presentationSprite": "image/maps/Characters/Faces/",
+        "animations": [
+            {
+                "name": "idle",
+                "spriteSheetName": "Idle",
+                "spriteSheetPath": "image/maps/Characters/Animations/Idle/Venusaur_Idle-Anim.png",
+                "spriteRowInSheet": 0
+            },
+            {
+                "name": "walk",
+                "spriteSheetName": "Walk",
+                "spriteSheetPath": "image/maps/Characters/Animations/Walk/Venusaur_Walk-Anim.png",
+                "spriteRowInSheet": 0
+            }
+        ],
+        "prevo": "Ivysaur"
     }
 }
