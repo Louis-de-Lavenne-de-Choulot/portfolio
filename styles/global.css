@@ -1,207 +1,100 @@
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
+/* PhoneComponent.module.css */
 
-header {
-    align-items: center;
-    background: url(/image/gtPictures/headerpict.png) no-repeat;
-    background-position: center;
-    background-size: cover;
-    display: flex;
-}
+.phone {
+    height: 100vh;
+  }
+  
+  .gameboy-div {
+    width: 100%;
+    height: 90%;
+    background-color: gray;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .gameboy {
+    text-align: -webkit-center;
+      width: 100%;
+      height: 80%;
+  }
 
-.col3 .pseudo {
-    height: auto
-}
-
-.logo2 {
-    border-bottom: 2px solid;
-    border-color: #1acbcb;
-    margin: 0
-}
-
-#apparition {
-    align-content: center;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap
-}
-
-.contain {
-    display: inline
-}
-
-.img-size {
-    text-align: center;
-    width: 20%
-}
-
-.img-size img {
-    width: 14vh;
-    image-rendering: pixelated;
-}
-
-.img-size p {
-    filter: invert(1);
-    mix-blend-mode: difference;
-    font-weight: bolder;
-}
-
-h4 {
-    margin: 0
-}
-
-#game {
-    display: flex;
-    height: 100%;
-    justify-content: center
-}
-
-#dropdown form {
-    text-align: center
-}
-
-#dropdownMenuButton1 {
-    border-bottom: none;
-}
-
-.col {
-    width: 33.33%;
-    align-items: center;
-    display: flex;
-    justify-content: flex-end
-}
-
-.header>.container>.row {
-    height: 22vh;
-}
-
-.container .row {
-    display: flex;
-    align-items: flex-end;
-}
-
-.row * {
-    padding: 0 !important
-}
-
-.col1>* {
-    width: 100%
-}
-
-.col1>*>* {
-    border: none
-}
-
-.col1,
-.col3 {
-    z-index: 2;
-}
-
-#dropdownMenuButton1,
-#btn_headImg {
-    background-color: transparent;
-    image-rendering: pixelated;
-}
-
-
-.col2 {
-    justify-content: center
-}
-
-.col2 * {
-    z-index: 1
-}
-
-#headImg,
-.logotxt {
-    width: 14.85vh;
-}
-
-.headerImg {
-    width: 35vh;
-}
-
-.col3 {
-    z-index: 1
-}
-
-.col3 * {
-    font-size: inherit;
-    height: 100%
-}
-
-.col3 img {
-    transform: scaleX(-1)
-}
-
-.menu ul.dropdown-menu {
-    min-width: 100%;
-    flex-direction: column;
-    align-items: center;
-}
-
-@media screen and (max-width: 374px) {
-
-    .col3 * {
-        font-size: 10px
-    }
-}
-
-#hov {
-    background-color: #000000d4;
-    border: 1px solid #000;
-    color: #fff;
-    display: none;
-    left: 0;
-    position: absolute;
-    width: 100%
-}
-
-#hov .container {
-    width: 100vw;
-}
-
-#hov .col {
+  #image_map {
     justify-content: center;
-    margin-right: 1px
-}
-
-#hov * {
-    font-size: 100%
-}
-
-#image_map {
-    display: grid;
+    display: flex;
     position: relative;
   }
   
-  #image_map canvas {
-    grid-column: 1;
-    grid-row: 1;
+  
+  .canvas {
+    position: absolute;
+    top: 20px;
+    border-width: thick;
+    display: flex;
+    border-style: solid;
+    width: 330px;
+    height: 330px;
+  }
+  
+  .buttons {
+    position: absolute;
+    bottom: 10px;
+  }
+  
+  .button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background-color: lightgray;
+    border-radius: 50%;
+    cursor: pointer;
   }
 
-.gameimg {
-    width: 70vw;
-    height: 70vw;
-}
+  .directional-cross {
+    position: absolute;
+    bottom: 100px;
+    left: 40%;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+  }
+  
+  .cross-arm {
+    position: absolute;
+    width: 50px;
+    height: 120px;
+    background-color: black;
+  }
+  
+  .cross-arm-top,
+  .cross-arm-bottom{
+    left: 25px;
+  }
+  .cross-arm-left{
+    left: 50px;
+  }
 
-body header * {
-    color: #fff;
-    text-decoration: none
-}
+  .cross-arm-bottom {
+    top: 50px;
+  }
+  
+  .cross-arm-right,
+  .cross-arm-left{
+    top: 25px;
+    rotate: 90deg;
+  }
 
-header .dropdown-toggle::after,
-header .divlogo::after {
-    display: none
-}
+  @media (min-width: 600px) {
+    .gameboy-div {
+      height: 100% !important;
+    }
 
-@keyframes tilt-shaking {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(1deg); }
-    50% { transform: rotate(0eg); }
-    75% { transform: rotate(-1deg); }
-    100% { transform: rotate(0deg); }
-}
+    .canvas {
+      width: 600px !important;
+      height: 600px !important;
+    }
+
+    .directional-cross, .buttons{
+      display: none;
+    }
+  }

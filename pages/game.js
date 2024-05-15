@@ -16,7 +16,6 @@ export default async function Game() {
     let normMapSize = 3000;
     let size = 54;
     let mPos = Math.floor(normMapSize / size);
-    let canvasSIZE = 700;
     let viewZoom = 10;
     let letgo = 0;
 
@@ -83,62 +82,44 @@ export default async function Game() {
         }
     }
 
-    let exit = {
-        posX: 0,
-        posY: 0,
-        color: "rgb(255, 0, 255)",
-    }
-
     let projects = [
         {
-            name: "Simu Multiplayer VR UNITY", posX: 0, posY: 0, color: "rgba(255, 255, 0, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/ALGOSUP_2022_Project_4_F"
+            name: "Simu Multiplayer VR UNITY", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/ALGOSUP_2022_Project_4_F"
         },
         {
-            name: "Application de Management", posX: 0, posY: 0, color: "rgba(255, 0, 100, 1)", link: ""
+            name: "Application de Management", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: ""
         },
         {
-            name: "Synthetiseur musique - F#", posX: 0, posY: 0, color: "rgba(25, 205, 100, 1)", link: "https://github.com/ClementCaton/ALGOSUP_2022_Project_3_A"
+            name: "Synthetiseur musique - F#", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: "https://github.com/ClementCaton/ALGOSUP_2022_Project_3_A"
         },
         {
-            name: "Sites web clients Wordpress", posX: 0, posY: 0, color: "rgba(255, 100, 150, 1)", link: "https://annepouraud.fr/"
+            name: "Sites web clients Wordpress", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: "https://annepouraud.fr/"
         },
         {
-            name: "Site web de EURO WEB PARTNERS", posX: 0, posY: 0, color: "rgba(0, 100, 255, 1)", link: "https://ewp.fr/"
+            name: "Site web de EURO WEB PARTNERS", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: "https://ewp.fr/"
         },
         {
-            name: "Serveur ultra sécurisé - Go compilé", posX: 0, posY: 0, color: "rgba(255, 102, 255, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/Go-server"
+            name: "Serveur ultra sécurisé - Go compilé", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/Go-server"
         },
         {
-            name: "Personal AI (reproduction d'Alexa++) - Go", posX: 0, posY: 0, color: "rgba(205, 100, 100, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/Personal-AI"
+            name: "Personal AI (Alexa++) - Go", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/Personal-AI"
         },
         {
-            name: "LIMITLESS jeu PC/VR UNITY", posX: 0, posY: 0, color: "rgba(105, 100, 150, 1)", link: "https://github.com/BrendonDesvaux/Limitless"
+            name: "LIMITLESS jeu PC/VR UNITY", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: "https://github.com/BrendonDesvaux/Limitless"
         },
         {
-            name: "Article VPN dans Programmez", posX: 0, posY: 0, color: "rgba(225, 190, 80, 1)", link: "/pdf/Prog.pdf"
+            name: "Article VPN dans Programmez", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: "/pdf/Prog.pdf"
         },
         {
             name: "C# Light ORM", posX: 0, posY: 0, color: "rgba(165, 240, 15, 1)", link: "https://github.com/Louis-de-Lavenne-de-Choulot/LORM"
         }
     ]
 
-    let roomStruct = {
-        wallColor: "rgb(10, 10, 10)",
-        floorColor: "rgb(120, 170, 80)",
-        corridorColor: "rgb(200, 200, 200)",
-        exitColor: exit.color,
-        wallTiles: [],
-        floorTiles: [],
-    }
-
     let floornumber = 1;
     // array of enemy objects
     let enemies = [];
 
-    let floorEnemies = [];
     let floorItems = [];
-
-    let rooms = [];
 
     let nFloor = false;
     let stopInputs = false;
@@ -756,12 +737,12 @@ export default async function Game() {
         // names  + hp + level
         let texts = [];
 
-        color = 'rgb(170, 170, 240)';
+        let color = 'rgb(170, 170, 240)';
         ctxui.strokeStyle = "rgba(10,10,10, 1)";
         ctxui.lineWidth = .3;
         ctxui.globalAlpha = 1;
         ctxui.fillStyle = color;
-        ctxui.font = "20px Arial";
+        ctxui.font = "40px Arial";
 
         if (arrOptions == menuOptions) {
             texts.push(`${player.name}  ${player.hp}/${player.maxHp} Lvl${player.level}`);
@@ -834,7 +815,7 @@ export default async function Game() {
         ctxui.strokeStyle = "rgba(10,10,10, 1)";
         ctxui.lineWidth = .5;
         ctxui.globalAlpha = 1;
-        ctxui.font = "bold 20px Arial";
+        ctxui.font = "bold 30px Arial";
         ctxui.fillStyle = color;
         ctxui.fillText(txt, canvasGame.width / 8 + 20, drawHeight);
         ctxui.fillText(txt, canvasGame.width / 8 + 20, drawHeight);
@@ -856,7 +837,7 @@ export default async function Game() {
 
         let text = `${floornumber}F Lvl${player.level}          HP ${player.hp}/${player.maxHp}`
         ctxui.fillStyle = "rgba(250, 250, 250, 1)";
-        ctxui.font = "bold 20px Arial";
+        ctxui.font = "bold 30px Arial";
         ctxui.fillText(text, 30, 20);
         ctxui.strokeStyle = "rgb(50,50,50)";
         ctxui.lineWidth = 1.2;
@@ -1094,7 +1075,7 @@ export default async function Game() {
                     }
                 }
                 // because it's stylish
-                if (document.getElementById("stylish").checked) {
+                if (document.getElementById("stylish") && document.getElementById("stylish").checked) {
                     await new Promise(r => setTimeout(r, document.getElementById("myRange").value));
                 }
                 occurencecounter[1] = 0;
@@ -1223,8 +1204,6 @@ export default async function Game() {
         }
 
         animatedDrawMap(2, 0);
-        audio = new Audio('gameSound/magicSchool.ogg');
-        audio.play();
         audio.loop = true;
     }
 
@@ -1511,8 +1490,88 @@ export default async function Game() {
             }
         }
     });
+    
+    if (
+        document.getElementById("topcross") &&
+        document.getElementById("leftcross") &&
+        document.getElementById("rightcross") &&
+        document.getElementById("bottomcross")
+    ) {
+        let touchStartHandler = (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+    
+            if (action_in_progress) {
+                return;
+            }
+            if (UIMODE === 0) {
+                letgo = false;
+                if (event.target.id === "topcross") {
+                    player.spriteDirection[0] = -1;
+                    movePlayer(0, -1);
+                } else if (event.target.id === "leftcross") {
+                    player.spriteDirection[1] = 1;
+                    movePlayer(1, 0);
+                } else if (event.target.id === "rightcross") {
+                    player.spriteDirection[1] = -1;
+                    movePlayer(-1, 0);
+                } else if (event.target.id === "bottomcross") {
+                    player.spriteDirection[0] = 1;
+                    movePlayer(0, 1);
+                }
+            } else {
+                interfaceUI((cursorOptions - 1 >= 0 ? cursorOptions - 1 : currentOptions.length));
+            }
+        }
+        //create empty interval
+        let upTouchEnd = setInterval(() => {}, 10000);
+        let leftTouchEnd =  setInterval(() => {}, 10000);
+        let rightTouchEnd =  setInterval(() => {}, 10000);
+        let bottomTouchEnd = setInterval(() => {}, 10000);
+    
+        document.getElementById("topcross").addEventListener("touchstart", (event) => {
+            upTouchEnd = setInterval(() => {
+                touchStartHandler(event);
+            }, 100)});
+        document.getElementById("topcross").addEventListener("touchend", (event) => {
+            clearInterval(upTouchEnd);
+        });
+    
+        document.getElementById("leftcross").addEventListener("touchstart", (event) =>  {
+            leftTouchEnd = setInterval(() => {
+                touchStartHandler(event);
+            }, 100)});
+        document.getElementById("leftcross").addEventListener("touchend", (event) => {
+            clearInterval(leftTouchEnd);
+        });
+    
+        document.getElementById("rightcross").addEventListener("touchstart", (event) => {
+            rightTouchEnd = setInterval(() => {
+                touchStartHandler(event);
+            }, 100)});
+            document.getElementById("rightcross").addEventListener("touchend", (event) => {
+            clearInterval(rightTouchEnd);
+        });
+        document.getElementById("bottomcross").addEventListener("touchstart", (event) => {
+            bottomTouchEnd = setInterval(() => {
+                touchStartHandler(event);
+            }, 100);
+        });
+        document.getElementById("bottomcross").addEventListener("touchend", (event) => {
+            clearInterval(bottomTouchEnd);
+        });
 
-
+        document.getElementById("ebtn").addEventListener("touchstart", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+    
+            
+            if (action_in_progress) {
+                return;
+            }
+            nextFloor();
+        });
+    }
 
 
 
