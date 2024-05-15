@@ -36,7 +36,8 @@
   
   .buttons {
     position: absolute;
-    bottom: 10px;
+    bottom: -80px;
+    right: 8%;
   }
   
   .button {
@@ -52,8 +53,8 @@
 
   .directional-cross {
     position: absolute;
-    bottom: 100px;
-    left: 40%;
+    bottom: -150px;
+    left: 30%;
     width: 100px;
     height: 100px;
     margin: 0 auto;

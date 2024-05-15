@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-
+import Link from 'next/link';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function PhonePage() {
@@ -8,6 +8,24 @@ function PhonePage() {
     }, []);
   
   return (
+    
+    <div>
+      <h1>Welcome to my CV!</h1>
+      <p>
+        I am a software engineer with a passion for challenges. I
+        have experience in a variety of technologies, including languages like Go, C#, Python, Javascript etc...
+      </p>
+      <p>
+        You can view my projects on my{' '}
+        <Link legacyBehavior href="https://github.com/Louis-de-Lavenne-de-Choulot">
+          <a target="_blank">GitHub</a>
+        </Link>{' '}
+        page or learn more about my professional experience on my{' '}
+        <Link legacyBehavior href="https://www.linkedin.com/in/louis-de-lavenne-de-choulot-b911191b8/">
+          <a target="_blank">LinkedIn</a>
+        </Link>
+        .
+      </p>
     <div className={"phone"}>
       <div className={"gameboy-div"}>
       <div className={"gameboy"}>
@@ -28,6 +46,7 @@ function PhonePage() {
 </div>
 </div>
       </div>
+    </div>
     </div>
   );
 }
