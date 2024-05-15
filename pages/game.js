@@ -1,13 +1,4 @@
-//A garder pour l'inspi. (utilisation coo)
-//topof=document.getElementById("game_map").getBoundingClientRect().top;
-//leftof=document.getElementById("game_map").getBoundingClientRect().left;
-//console.log("top : " +topof, " and left : " +leftof);
-//document.elementsFromPoint(leftof , topof)[0].style.fill = "rgb(20, 100, 100)";
-
-//generate rooms and paths in bounds of mpos x mpos
-//generate a random number of rooms
-
-export default async function Game() {
+const Game = async function Game() {
     let canvasGame = document.getElementById("canvass");
     let canvasItem = document.getElementById("items");
     let canvasCharacter = document.getElementById("characters");
