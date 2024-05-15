@@ -1717,3 +1717,5 @@ const Game = async function Game() {
     //call UpdateAnimations once every 1s
     setInterval(updateAnimations, 250);
 }
+
+export default Game;
